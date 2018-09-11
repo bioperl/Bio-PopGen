@@ -1,7 +1,7 @@
 #
 # BioPerl module for Bio::PopGen::IO::csv
 #
-# Please direct questions and support issues to <bioperl-l@bioperl.org> 
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
 # Cared for by Jason Stajich <jason-at-bioperl.org>
 #
@@ -13,7 +13,7 @@
 
 =head1 NAME
 
-Bio::PopGen::IO::csv -Extract individual allele data from a CSV parser 
+Bio::PopGen::IO::csv -Extract individual allele data from a CSV parser
 
 =head1 SYNOPSIS
 
@@ -34,9 +34,9 @@ Bio::PopGen::IO::csv -Extract individual allele data from a CSV parser
 
 This object will parse comma delimited format (CSV) or whatever
 delimiter you specify. It currently doesn't handle the more complex
-quote escaped CSV format.  There are 3 initialization parameters, 
-the delimiter (-field_delimiter) [default ','], (-allele_delimiter) 
-[default ' '].    The third initialization parameter is a boolean 
+quote escaped CSV format.  There are 3 initialization parameters,
+the delimiter (-field_delimiter) [default ','], (-allele_delimiter)
+[default ' '].    The third initialization parameter is a boolean
 -no_header which specifies if there is no header line to read in.  All lines starting with '#' will be skipped
 
 When no_header is not specific the data is assumed to be of the following form.
@@ -59,15 +59,15 @@ the Bioperl mailing list.  Your participation is much appreciated.
   bioperl-l@bioperl.org                  - General discussion
   http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
-=head2 Support 
+=head2 Support
 
 Please direct usage questions or support issues to the mailing list:
 
 I<bioperl-l@bioperl.org>
 
-rather than to the module maintainer directly. Many experienced and 
-reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem 
+rather than to the module maintainer directly. Many experienced and
+reponsive experts will be able look at the problem and quickly
+address it. Please include a thorough description of the problem
 with code and data examples if at all possible.
 
 =head2 Reporting Bugs
@@ -98,6 +98,7 @@ Internal methods are usually preceded with a _
 
 
 package Bio::PopGen::IO::csv;
+
 use vars qw($FieldDelim $AlleleDelim $NoHeader);
 use strict;
 
@@ -116,9 +117,9 @@ use base qw(Bio::PopGen::IO);
 
  Title   : new
  Usage   : my $obj = Bio::PopGen::IO::csv->new();
- Function: Builds a new Bio::PopGen::IO::csv object 
+ Function: Builds a new Bio::PopGen::IO::csv object
  Returns : an instance of Bio::PopGen::IO::csv
- Args    : [optional, these are the current defaults] 
+ Args    : [optional, these are the current defaults]
            -field_delimiter => ','
            -allele_delimiter=> '\s+'
            -no_header       => 0,
@@ -128,7 +129,7 @@ use base qw(Bio::PopGen::IO);
 
 sub _initialize {
     my($self, @args) = @_;
-    my ($fieldsep,$all_sep, 
+    my ($fieldsep,$all_sep,
 	$noheader) = $self->_rearrange([qw(FIELD_DELIMITER
 					   ALLELE_DELIMITER
 					   NO_HEADER)],@args);
@@ -148,8 +149,8 @@ sub _initialize {
  Usage   : $obj->flag($flagname,$newval)
  Function: Get/Set the flag value
  Returns : value of a flag (a boolean)
- Args    : A flag name, currently we expect 
-           'no_header', 'field_delimiter', or 'allele_delimiter' 
+ Args    : A flag name, currently we expect
+           'no_header', 'field_delimiter', or 'allele_delimiter'
            on set, new value (a boolean or undef, optional)
 
 
@@ -159,7 +160,7 @@ sub flag{
     my $self = shift;
     my $fieldname = shift;
     return unless defined $fieldname;
-    
+
     return $self->{'_flag'}->{$fieldname} = shift if @_;
     return $self->{'_flag'}->{$fieldname};
 }
@@ -182,8 +183,8 @@ sub next_individual{
 	next if( /^\s*\#/ || /^\s+$/ || ! length($_) );
 	last;
     }
-    return if ! defined $_; 
-    if( $self->flag('no_header') || 
+    return if ! defined $_;
+    if( $self->flag('no_header') ||
 	defined $self->{'_header'} ) {
 
 	#########new (allows field delim to be the same as the allele delim
@@ -201,9 +202,9 @@ sub next_individual{
 
 		($samp) = /(^.+?)$fielddelim/;
 		s/^.+?$fielddelim//;
-	
+
 		(@marker_results) = /([\d|\w]+$alleledelim[\d|\w]+)/g;
-	
+
 	}
 
 	#########end new
@@ -215,17 +216,17 @@ sub next_individual{
 	    my $markername;
 	    if( defined $self->{'_header'} ) {
 		$markername = $self->{'_header'}->[$i];
-	    } else { 
+	    } else {
 		$markername = "Marker$i";
 	    }
 	    $self->debug( "markername is $markername alleles are $m\n");
 
 	    my @alleles = split($self->flag('allele_delimiter'), $m);
-		
+
 	    $m = Bio::PopGen::Genotype->new(-alleles      => \@alleles,
 					   -marker_name  => $markername,
-					   -individual_id=> $samp); 
-	    $i++; 
+					   -individual_id=> $samp);
+	    $i++;
 	}
 	return Bio::PopGen::Individual->new(-unique_id => $samp,
 					   -genotypes => \@marker_results);
@@ -249,7 +250,7 @@ sub next_individual{
 
 =cut
 
-# Plan is to just return the whole dataset as a single population by 
+# Plan is to just return the whole dataset as a single population by
 # default I think - people would then have each population in a separate
 # file.
 
@@ -279,7 +280,7 @@ sub write_individual{
     my ($self,@inds) = @_;
     my $fielddelim  = $self->flag('field_delimiter');
     my $alleledelim= $self->flag('allele_delimiter');
-    
+
     foreach my $ind ( @inds ) {
 	if (! ref($ind) || ! $ind->isa('Bio::PopGen::IndividualI') ) {
 	    $self->warn("Cannot write an object that is not a Bio::PopGen::IndividualI object ($ind)");
@@ -288,26 +289,26 @@ sub write_individual{
 	# we'll go ahead and sort these until
 	# we have a better way to insure a consistent order
 	my @marker_names = sort $ind->get_marker_names;
-	if( ! $self->flag('no_header') && 
+	if( ! $self->flag('no_header') &&
 	    ! $self->flag('header_written') ) {
 	    $self->_print(join($fielddelim, ('SAMPLE', @marker_names)), "\n");
 	    $self->flag('header_written',1);
 	}
-	$self->_print( join($fielddelim, $ind->unique_id, 
+	$self->_print( join($fielddelim, $ind->unique_id,
 			    # we're chaining map here, pay attention and read
 			    # starting with the last map
-			    
+
 			    # we'll turn genotypes into allele pairs
 			    # which will be separated by the allele delimiter
-			    map { join($alleledelim,$_->get_Alleles) } 
+			    map { join($alleledelim,$_->get_Alleles) }
 			    # marker names will be sorted so we don't
 			    # have to worry about this between individuals
-			    # unless the individual set you pass in has 
+			    # unless the individual set you pass in has
 			    # a mixed set of markers...
 			    # this will turn marker names into Genotypes
-			    map {$ind->get_Genotypes(-marker => $_)} 
+			    map {$ind->get_Genotypes(-marker => $_)}
 			    @marker_names), "\n")
-    }    
+    }
 }
 
 =head2 write_population
@@ -334,29 +335,29 @@ sub write_population{
 	# we'll go ahead and sort these until
 	# we have a better way to insure a consistent order
 	my @marker_names = sort $pop->get_marker_names;
-	if( ! $self->flag('no_header') && 
+	if( ! $self->flag('no_header') &&
 	    ! $self->flag('header_written') ) {
-	    $self->_print( join($fielddelim, ('SAMPLE', @marker_names)), 
+	    $self->_print( join($fielddelim, ('SAMPLE', @marker_names)),
 			   "\n");
 	    $self->flag('header_written',1);
 	}
 	foreach my $ind ( $pop->get_Individuals ) {
-	   $self->_print( join($fielddelim, $ind->unique_id, 
-			       # we're chaining map here, pay attention 
+	   $self->_print( join($fielddelim, $ind->unique_id,
+			       # we're chaining map here, pay attention
 			       # and read starting with the last map
-			       
+
 			       # we'll turn genotypes into allele pairs
-			       # which will be separated by the allele 
+			       # which will be separated by the allele
 			       # delimiter
-			       map { join($alleledelim,$_->get_Alleles) } 
+			       map { join($alleledelim,$_->get_Alleles) }
 			       # marker names will be sorted so we don't
 			       # have to worry about this between individuals
-			       # unless the individual set you pass in has 
+			       # unless the individual set you pass in has
 			       # a mixed set of markers...
 			       # this will turn marker names into Genotypes
-			       map {$ind->get_Genotypes(-marker => $_)} 
+			       map {$ind->get_Genotypes(-marker => $_)}
 			       @marker_names), "\n");
-       }    
+       }
     }
 }
 

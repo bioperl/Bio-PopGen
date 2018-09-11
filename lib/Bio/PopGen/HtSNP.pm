@@ -273,15 +273,15 @@ the Bioperl mailing list.  Your participation is much appreciated.
   bioperl-l@bioperl.org                  - General discussion
   http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
-=head2 Support 
+=head2 Support
 
 Please direct usage questions or support issues to the mailing list:
 
 I<bioperl-l@bioperl.org>
 
-rather than to the module maintainer directly. Many experienced and 
-reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem 
+rather than to the module maintainer directly. Many experienced and
+reponsive experts will be able look at the problem and quickly
+address it. Please include a thorough description of the problem
 with code and data examples if at all possible.
 
 =head2 Reporting Bugs
@@ -307,6 +307,7 @@ Internal methods are usually preceded with a _
 # Let the code begin...
 
 package Bio::PopGen::HtSNP;
+
 use Data::Dumper;
 use Storable qw(dclone);
 
@@ -343,7 +344,7 @@ sub new {
     my $self = $class->SUPER::new(@args);
     my ($haplotype_block,
         $snp_ids,
-        $pattern_freq    ) = $self->_rearrange([qw(HAPLOTYPE_BLOCK 
+        $pattern_freq    ) = $self->_rearrange([qw(HAPLOTYPE_BLOCK
                                                    SNP_IDS
                                                    PATTERN_FREQ)],@args);
 
@@ -377,13 +378,13 @@ sub new {
     return $self;
 }
 
-=head2 haplotype_block 
+=head2 haplotype_block
 
- Title   : haplotype_block 
+ Title   : haplotype_block
  Usage   : my $haplotype_block = $HtSNP->haplotype_block();
  Function: Get the haplotype block for a haplotype tagging selection
- Returns : reference of array 
- Args    : reference of array with haplotype pattern 
+ Returns : reference of array
+ Args    : reference of array with haplotype pattern
 
 
 =cut
@@ -394,9 +395,9 @@ sub haplotype_block{
     return $self->{'_haplotype_block'};
 }
 
-=head2 snp_ids 
+=head2 snp_ids
 
- Title   : snp_ids 
+ Title   : snp_ids
  Usage   : my $snp_ids = $HtSNP->$snp_ids();
  Function: Get the ids for a haplotype tagging selection
  Returns : reference of array
@@ -595,7 +596,7 @@ sub _population_error{
     #  with the one in haplotype (input_block)
     if ($pf != $number_of_families) {
         $self->throw("The number of patterns on frequency array ($pf)\n".
-             "does not fit with the number of haplotype patterns on \n". 
+             "does not fit with the number of haplotype patterns on \n".
              "haplotype array ($number_of_families)\n");
     }
 }
@@ -1315,7 +1316,7 @@ sub _find_deg_pattern{
     my $self  = shift;
 
     my $arr   = $self ->{w_hap};          # the working haplotype
-    my $list  = $self ->{'deg_pattern'};  # degenerated patterns 
+    my $list  = $self ->{'deg_pattern'};  # degenerated patterns
 
     # we have to check all elements
     foreach my $i(0..$#$arr){
@@ -1698,5 +1699,3 @@ sub _snp_and_code_summary{
 
 
 1;
-
-

@@ -1,7 +1,7 @@
 #
 # BioPerl module for Bio::PopGen::IO::hapmap
 #
-# Please direct questions and support issues to <bioperl-l@bioperl.org> 
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
 # Cared for by Rich Dobson <r.j.dobson-at-qmul.ac.uk>
 #
@@ -45,15 +45,15 @@ the Bioperl mailing list.  Your participation is much appreciated.
   bioperl-l@bioperl.org                  - General discussion
   http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
-=head2 Support 
+=head2 Support
 
 Please direct usage questions or support issues to the mailing list:
 
 I<bioperl-l@bioperl.org>
 
-rather than to the module maintainer directly. Many experienced and 
-reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem 
+rather than to the module maintainer directly. Many experienced and
+reponsive experts will be able look at the problem and quickly
+address it. Please include a thorough description of the problem
 with code and data examples if at all possible.
 
 =head2 Reporting Bugs
@@ -83,6 +83,7 @@ Internal methods are usually preceded with a _
 # Let the code begin...
 
 package Bio::PopGen::IO::hapmap;
+
 use vars qw($FieldDelim $AlleleDelim $NoHeader $StartingCol);
 use strict;
 
@@ -99,9 +100,9 @@ use base qw(Bio::PopGen::IO);
 
  Title   : new
  Usage   : my $obj = Bio::PopGen::IO::hapmap->new();
- Function: Builds a new Bio::PopGen::IO::hapmap object 
+ Function: Builds a new Bio::PopGen::IO::hapmap object
  Returns : an instance of Bio::PopGen::IO::hapmap
- Args    : [optional, these are the current defaults] 
+ Args    : [optional, these are the current defaults]
            -field_delimiter => ','
            -allele_delimiter=> '\s+'
            -no_header       => 0,
@@ -116,7 +117,7 @@ sub _initialize  {
 
     $Bio::PopGen::Genotype::BlankAlleles='';
 
-    my ($fieldsep,$all_sep, 
+    my ($fieldsep,$all_sep,
 	$noheader, $start_col) = $self->_rearrange([qw(FIELD_DELIMITER
 						       ALLELE_DELIMITER
 						       NO_HEADER
@@ -139,8 +140,8 @@ sub _initialize  {
  Usage   : $obj->flag($flagname,$newval)
  Function: Get/Set the flag value
  Returns : value of a flag (a boolean)
- Args    : A flag name, currently we expect 
-           'no_header', 'field_delimiter', or 'allele_delimiter' 
+ Args    : A flag name, currently we expect
+           'no_header', 'field_delimiter', or 'allele_delimiter'
            on set, new value (a boolean or undef, optional)
 
 =cut
@@ -164,17 +165,17 @@ sub _pivot {
 	next if( /^\s*\#/ || /^\s+$/ || ! length($_) );
 	if( /^rs\#\s+alleles\s+chrom\s+pos\s+strand/ ) {
 	    @idheader = split $self->flag('field_delimiter');
-	} else { 
+	} else {
 	    push @cols, [split $self->flag('field_delimiter')];
 	}
     }
     my $startingcol = $self->starting_column;
 
     $self->{'_header'} = [ map { $_->[0] } @cols];
-    for my $n ($startingcol.. $#{ $cols[ 0 ]}) { 
+    for my $n ($startingcol.. $#{ $cols[ 0 ]}) {
 	my $column = [ $idheader[$n],
-		       map{ $_->[ $n ] } @cols ];	
-	push (@rows, $column); 
+		       map{ $_->[ $n ] } @cols ];
+	push (@rows, $column);
     }
     $self->{'_pivot'} = [@rows];
     $self->{'_i'} = 0;
@@ -220,20 +221,20 @@ sub next_individual  {
 	my $markername;
 	if( defined $self->{'_header'} ) {
 	    $markername = $self->{'_header'}->[$i-1];
-	} else { 
+	} else {
 	    $markername = "Marker$i";
 	}
-	
+
 	my @alleles = split($self->flag('allele_delimiter'), $m);
-	if( @alleles != 2 ) { 
+	if( @alleles != 2 ) {
 	    $self->warn("$m for $samp\n");
-	} else { 
+	} else {
 	    $m = Bio::PopGen::Genotype->new(-alleles       => \@alleles,
 					    -marker_name   => $markername,
 					    -marker_type   => 'S',          # Guess hapmap only has SNP data
 					    -individual_id => $samp);
 	}
-	$i++; 
+	$i++;
     }
 
     return new Bio::PopGen::Individual(-unique_id => $samp,
@@ -279,7 +280,7 @@ See L<Bio::PopGen::PopulationI>
 sub write_individual {
     my ($self,@inds) = @_;
 
-    # data from hapmap is output, not input, so 
+    # data from hapmap is output, not input, so
     # we don't need a method for writing and input file
 
     $self->throw_not_implemented();
@@ -310,7 +311,7 @@ sub write_population {
  Title   : starting_column
  Usage   : $obj->starting_column($newval)
  Function: Column where data starts
- Example : 
+ Example :
  Returns : value of starting_column (a scalar)
  Args    : on set, new value (a scalar or undef, optional)
 

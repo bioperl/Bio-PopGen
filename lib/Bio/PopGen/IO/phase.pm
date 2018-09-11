@@ -1,7 +1,7 @@
 #
 # BioPerl module for Bio::PopGen::IO::phase
 #
-# Please direct questions and support issues to <bioperl-l@bioperl.org> 
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
 # Cared for by Rich Dobson <r.j.dobson-at-qmul.ac.uk>
 #
@@ -48,15 +48,15 @@ the Bioperl mailing list.  Your participation is much appreciated.
   bioperl-l@bioperl.org                  - General discussion
   http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
-=head2 Support 
+=head2 Support
 
 Please direct usage questions or support issues to the mailing list:
 
 I<bioperl-l@bioperl.org>
 
-rather than to the module maintainer directly. Many experienced and 
-reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem 
+rather than to the module maintainer directly. Many experienced and
+reponsive experts will be able look at the problem and quickly
+address it. Please include a thorough description of the problem
 with code and data examples if at all possible.
 
 =head2 Reporting Bugs
@@ -87,6 +87,7 @@ Internal methods are usually preceded with a _
 
 
 package Bio::PopGen::IO::phase;
+
 use vars qw($FieldDelim $AlleleDelim $NoHeader);
 use strict;
 
@@ -105,9 +106,9 @@ use base qw(Bio::PopGen::IO);
 
  Title   : new
  Usage   : my $obj = Bio::PopGen::IO::hapmap->new();
- Function: Builds a new Bio::PopGen::IO::hapmap object 
+ Function: Builds a new Bio::PopGen::IO::hapmap object
  Returns : an instance of Bio::PopGen::IO::hapmap
- Args    : [optional, these are the current defaults] 
+ Args    : [optional, these are the current defaults]
            -field_delimiter => ' '
            -allele_delimiter=> '\s+'
            -no_header       => 0,
@@ -122,7 +123,7 @@ sub _initialize  {
 
     $Bio::PopGen::Genotype::BlankAlleles='';
 
-    my ($fieldsep,$all_sep, 
+    my ($fieldsep,$all_sep,
 	$noheader) = $self->_rearrange([qw(FIELD_DELIMITER
 					   ALLELE_DELIMITER
 					   NO_HEADER)],@args);
@@ -142,8 +143,8 @@ sub _initialize  {
  Usage   : $obj->flag($flagname,$newval)
  Function: Get/Set the flag value
  Returns : value of a flag (a boolean)
- Args    : A flag name, currently we expect 
-           'no_header', 'field_delimiter', or 'allele_delimiter' 
+ Args    : A flag name, currently we expect
+           'no_header', 'field_delimiter', or 'allele_delimiter'
            on set, new value (a boolean or undef, optional)
 
 
@@ -182,8 +183,8 @@ sub next_individual  {
 	next if( /^\s+$/ || ! length($_) );
 	last;
     }
-    
-    return unless defined $_; 
+
+    return unless defined $_;
     if( $self->flag('no_header') || defined $self->{'_header'} ) {
 
 	####### sometimes there is some marker info at the start of a phase input file
@@ -218,7 +219,7 @@ sub next_individual  {
 	    if( $self->{'_row1'} ) {
 		# if we are looking at the 2nd row of alleles for this id
 
-		@{$self->{'_second_row'}} = 
+		@{$self->{'_second_row'}} =
 		    split($self->flag('field_delimiter'),$_);
 
 		for my $i(0 .. $#{$self->{'_first_row'}}){
@@ -247,7 +248,7 @@ sub next_individual  {
 		$markername = (split($self->flag('field_delimiter'), $self->flag('marker_positions')))[$i];
 	    } elsif( defined $self->{'_header'} ) {
 		$markername = $self->{'_header'}->[$i] || "$i";
-	    } else { 
+	    } else {
 		$markername = "$i";
 	    }
 
@@ -259,13 +260,13 @@ sub next_individual  {
 	    }
 
 	    $self->debug( "markername is $markername alleles are $m\n");
-	    my @alleles = split($self->flag('allele_delimiter'), $m);	
+	    my @alleles = split($self->flag('allele_delimiter'), $m);
 
 	    $m = Bio::PopGen::Genotype->new(-alleles       =>\@alleles,
 					    -marker_name   => $markername,
 					    -marker_type   => $markertype,
-					    -individual_id => $self->{'_sam'}); 
-	    $i++; 
+					    -individual_id => $self->{'_sam'});
+	    $i++;
 	}
 	return Bio::PopGen::Individual->new(-unique_id => $self->{'_sam'},
 					   -genotypes =>\@{$self->{'_marker_results'}},
@@ -331,7 +332,7 @@ sub write_individual {
 	    my $n_markers = scalar(@marker_names);
 	    $self->_print( "1\n");
 	    $self->_print( $n_markers, "\n");
-	    if( $self->flag('no_header') && 
+	    if( $self->flag('no_header') &&
 		! $self->flag('header_written') ) {
 		$self->_print(join($fielddelim, ('P', @marker_names)), "\n");
 		$self->flag('header_written',1);
@@ -341,7 +342,7 @@ sub write_individual {
 	    }
 	    $self->_print("\n");
 	}
-	
+
 	my(@row1,@row2);
 	for (@marker_names){
 	    my $geno = $ind->get_Genotypes(-marker => $_);
@@ -382,7 +383,7 @@ sub write_population {
 	my $n_markers = scalar(@marker_names);
 	$self->_print( $pop->get_number_individuals, "\n");
 	$self->_print( $n_markers, "\n");
-	if( $self->flag('no_header') && 
+	if( $self->flag('no_header') &&
 	    ! $self->flag('header_written') ) {
 	    $self->_print( join($fielddelim, ('P', @marker_names)), "\n");
 	    $self->flag('header_written',1);
@@ -392,7 +393,7 @@ sub write_population {
 	    $self->_print(($pop->get_Genotypes($_))[0]->marker_type);
 	}
 	$self->_print("\n");
-	
+
 	$self->write_individual( $pop->get_Individuals, 0 );
     }
 }

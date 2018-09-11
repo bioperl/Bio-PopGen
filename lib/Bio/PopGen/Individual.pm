@@ -1,7 +1,7 @@
 #
 # BioPerl module for Bio::PopGen::Individual
 #
-# Please direct questions and support issues to <bioperl-l@bioperl.org> 
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
 # Cared for by Jason Stajich <jason-at-bioperl.org>
 #
@@ -38,15 +38,15 @@ the Bioperl mailing list.  Your participation is much appreciated.
   bioperl-l@bioperl.org                  - General discussion
   http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
-=head2 Support 
+=head2 Support
 
 Please direct usage questions or support issues to the mailing list:
 
 I<bioperl-l@bioperl.org>
 
-rather than to the module maintainer directly. Many experienced and 
-reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem 
+rather than to the module maintainer directly. Many experienced and
+reponsive experts will be able look at the problem and quickly
+address it. Please include a thorough description of the problem
 with code and data examples if at all possible.
 
 =head2 Reporting Bugs
@@ -77,6 +77,7 @@ Internal methods are usually preceded with a _
 
 
 package Bio::PopGen::Individual;
+
 use vars qw($UIDCOUNTER);
 use strict;
 BEGIN { $UIDCOUNTER = 1 }
@@ -90,7 +91,7 @@ use base qw(Bio::Root::Root Bio::PopGen::IndividualI);
 
  Title   : new
  Usage   : my $obj = Bio::PopGen::Individual->new();
- Function: Builds a new Bio::PopGen::Individual object 
+ Function: Builds a new Bio::PopGen::Individual object
  Returns : an instance of Bio::PopGen::Individual
  Args    : -unique_id => $id,
            -genotypes => \@genotypes
@@ -107,12 +108,12 @@ sub new {
 					       GENOTYPES)],@args);
   unless( defined $uid ) {
       $uid = $UIDCOUNTER++;
-  } 
+  }
   $self->unique_id($uid);
   if( defined $genotypes ) {
       if( ref($genotypes) =~ /array/i ) {
 	  $self->add_Genotype(@$genotypes);
-      } else { 
+      } else {
 	  $self->warn("Must provide a valid array reference to set the genotypes value in the constructor");
       }
   }
@@ -174,31 +175,31 @@ sub annotation{
  Usage   : $individual->add_Genotype
  Function: add a genotype value
  Returns : count of the number of genotypes associated with this individual
- Args    : @genotypes - L<Bio::PopGen::GenotypeI> object(s) containing 
+ Args    : @genotypes - L<Bio::PopGen::GenotypeI> object(s) containing
                         alleles plus a marker name
 
 =cut
 
 sub add_Genotype {
    my ($self,@genotypes) = @_;
-   
+
    foreach my $g ( @genotypes ) {
        if( !ref($g) || ! $g->isa('Bio::PopGen::GenotypeI') ) {
 	   $self->warn("cannot add $g as a genotype skipping");
 	   next;
        }
        my $mname = $g->marker_name;
-       if( ! defined $mname || ! length($mname) ) { 
-         # can't just say ! name b/c '0' wouldn't be valid 
+       if( ! defined $mname || ! length($mname) ) {
+         # can't just say ! name b/c '0' wouldn't be valid
 	   $self->warn("cannot add genotype because marker name is not defined or is an empty string");
 	   next;
        }
-       if( $self->verbose > 0 && 
+       if( $self->verbose > 0 &&
 	   defined $self->{'_genotypes'}->{$mname} ) {
-	   # a warning when we have verbosity cranked up 
+	   # a warning when we have verbosity cranked up
 	   $self->debug("Overwriting the previous value for $mname for this individual");
        }
-       # this will force Genotype individual_id to be set to 
+       # this will force Genotype individual_id to be set to
        # the Individual it has been added for
        $g->individual_id($self->unique_id);
        $self->{'_genotypes'}->{$mname} = $g;
@@ -227,7 +228,7 @@ sub reset_Genotypes{
  Usage   : $individual->remove_Genotype(@names)
  Function: Removes the genotypes for the requested markers
  Returns : none
- Args    : Names of markers 
+ Args    : Names of markers
 
 
 =cut
@@ -245,7 +246,7 @@ sub remove_Genotype{
  Usage   : my @genotypes = $ind->get_Genotypes(-marker => $markername);
  Function: Get the genotypes for an individual, based on a criteria
  Returns : Array of genotypes
- Args    : either none (return all genotypes) or 
+ Args    : either none (return all genotypes) or
            -marker => name of marker to return (exact match, case matters)
 
 
@@ -255,7 +256,7 @@ sub get_Genotypes{
    my ($self,@args) = @_;
    if( @args ) {
        unshift @args, '-marker' if( @args == 1 );  # deal with single args
-       
+
        my ($name) = $self->_rearrange([qw(MARKER)], @args);
        if( ! defined($name) ) {
 	   $self->warn("Only know how to process the -marker field currently");
@@ -271,7 +272,7 @@ sub get_Genotypes{
 
  Title   : has_Marker
  Usage   : if( $ind->has_Marker($name) ) {}
- Function: Boolean test to see if an Individual has a genotype 
+ Function: Boolean test to see if an Individual has a genotype
            for a specific marker
  Returns : Boolean (true or false)
  Args    : String representing a marker name
@@ -284,7 +285,7 @@ sub has_Marker{
    return 0 if ! defined $name;
 
    $name = $name->name if ref($name) && $name->isa('Bio::PopGen::MarkerI');
-   if( ref($name) ) { 
+   if( ref($name) ) {
        $self->warn("Passed in a ".ref($name). " to has_Marker, expecting either a string or a Bio::PopGen::MarkerI");
        return 0;
    }

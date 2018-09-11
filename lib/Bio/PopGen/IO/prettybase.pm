@@ -1,7 +1,7 @@
 #
 # BioPerl module for Bio::PopGen::IO::prettybase
 #
-# Please direct questions and support issues to <bioperl-l@bioperl.org> 
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
 # Cared for by Jason Stajich <jason-at-bioperl.org>
 #
@@ -43,15 +43,15 @@ the Bioperl mailing list.  Your participation is much appreciated.
   bioperl-l@bioperl.org                  - General discussion
   http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
-=head2 Support 
+=head2 Support
 
 Please direct usage questions or support issues to the mailing list:
 
 I<bioperl-l@bioperl.org>
 
-rather than to the module maintainer directly. Many experienced and 
-reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem 
+rather than to the module maintainer directly. Many experienced and
+reponsive experts will be able look at the problem and quickly
+address it. Please include a thorough description of the problem
 with code and data examples if at all possible.
 
 =head2 Reporting Bugs
@@ -82,6 +82,7 @@ Internal methods are usually preceded with a _
 
 
 package Bio::PopGen::IO::prettybase;
+
 use vars qw($FieldDelim $Header);
 use strict;
 
@@ -98,9 +99,9 @@ use base qw(Bio::PopGen::IO);
 
  Title   : new
  Usage   : my $obj = Bio::PopGen::IO::prettybase->new();
- Function: Builds a new Bio::PopGen::IO::prettybase object 
+ Function: Builds a new Bio::PopGen::IO::prettybase object
  Returns : an instance of Bio::PopGen::IO::prettybase
- Args    : -field_delimiter      => a field delimiter character or regexp (default is /\t/ ) 
+ Args    : -field_delimiter      => a field delimiter character or regexp (default is /\t/ )
            -header               => boolean if the file will have a header and parser should
                                     skip first line in the file (default is false)
            -convert_indel_states => convert alleles which are longer than one character
@@ -133,8 +134,8 @@ sub _initialize {
  Usage   : $obj->flag($flagname,$newval)
  Function: Get/Set the flag value
  Returns : value of a flag (a boolean)
- Args    : A flag name, currently we expect 
-           'header', 'field_delimiter', or 'allele_delimiter' 
+ Args    : A flag name, currently we expect
+           'header', 'field_delimiter', or 'allele_delimiter'
            on set, new value (a boolean or undef, optional)
 
 
@@ -144,7 +145,7 @@ sub flag{
     my $self = shift;
     my $fieldname = shift;
     return unless defined $fieldname;
-    
+
     return $self->{'_flag'}->{$fieldname} = shift if @_;
     return $self->{'_flag'}->{$fieldname};
 }
@@ -182,7 +183,7 @@ sub next_individual {
 
 =cut
 
-# Plan is to just return the whole dataset as a single population by 
+# Plan is to just return the whole dataset as a single population by
 # default I think - people would then have each population in a separate
 # file.
 
@@ -203,9 +204,9 @@ sub _parse_prettybase {
     my $convert_indels = $self->flag('convert_indel');
     while( defined( $_ = $self->_readline) ) {
 	next if( /^\s*\#/ || /^\s+$/ || ! length($_) );
-	
+
 	my ($site,$sample,@alleles) = split($self->flag('field_delimiter'),$_);
-	if( ! defined $sample ) { 
+	if( ! defined $sample ) {
 	    warn("sample id is undefined for $_");
 	    next;
 	}
@@ -222,11 +223,11 @@ sub _parse_prettybase {
 		}
 	    }
 	}
-	
+
 	my $g = Bio::PopGen::Genotype->new(-alleles      => \@alleles,
 					  -marker_name  => $site,
-					  -individual_id=> $sample); 
-	
+					  -individual_id=> $sample);
+
 
 	if( ! defined $inds{$sample} ) {
 	    $inds{$sample} = Bio::PopGen::Individual->new(-unique_id => $sample);
@@ -256,14 +257,14 @@ sub write_individual{
 	    $self->warn("Cannot write an object that is not a Bio::PopGen::IndividualI object");
 	    next;
 	}
-	foreach my $marker ( $ind->get_marker_names ) { 
+	foreach my $marker ( $ind->get_marker_names ) {
 	    my $g = $ind->get_Genotypes(-marker=> $marker);
 	    next unless defined $g;
-	    $self->_print( join("\t", $marker, $ind->unique_id, 
-				$g->get_Alleles), "\n");	    
+	    $self->_print( join("\t", $marker, $ind->unique_id,
+				$g->get_Alleles), "\n");
 	}
     }
-    
+
 }
 
 
@@ -292,12 +293,12 @@ sub write_population{
 		$self->warn("Cannot write an object that is not a Bio::PopGen::IndividualI object");
 		next;
 	    }
-	    foreach my $marker ( @mnames ) { 
+	    foreach my $marker ( @mnames ) {
 		my $g = $ind->get_Genotypes(-marker=> $marker);
 		next unless defined $g;
-		$self->_print( join("\t", $marker, $ind->unique_id, 
+		$self->_print( join("\t", $marker, $ind->unique_id,
 				    $g->get_Alleles), "\n");
-			   
+
 	    }
 	}
     }

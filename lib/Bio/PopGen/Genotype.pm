@@ -1,7 +1,7 @@
 #
 # BioPerl module for Bio::PopGen::Genotype
 #
-# Please direct questions and support issues to <bioperl-l@bioperl.org> 
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
 # Cared for by Jason Stajich <jason-at-bioperl.org>
 #
@@ -45,15 +45,15 @@ the Bioperl mailing list.  Your participation is much appreciated.
   bioperl-l@bioperl.org                  - General discussion
   http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
-=head2 Support 
+=head2 Support
 
 Please direct usage questions or support issues to the mailing list:
 
 I<bioperl-l@bioperl.org>
 
-rather than to the module maintainer directly. Many experienced and 
-reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem 
+rather than to the module maintainer directly. Many experienced and
+reponsive experts will be able look at the problem and quickly
+address it. Please include a thorough description of the problem
 with code and data examples if at all possible.
 
 =head2 Reporting Bugs
@@ -84,6 +84,7 @@ Internal methods are usually preceded with a _
 
 
 package Bio::PopGen::Genotype;
+
 use vars qw($BlankAlleles);
 use strict;
 
@@ -100,7 +101,7 @@ use base qw(Bio::Root::Root Bio::PopGen::GenotypeI);
 
  Title   : new
  Usage   : my $obj = Bio::PopGen::Genotype->new();
- Function: Builds a new Bio::PopGen::Genotype object 
+ Function: Builds a new Bio::PopGen::Genotype object
  Returns : an instance of Bio::PopGen::Genotype
  Args    : -marker_name   => string representing name of the marker
            -individual_id => string representing individual id (optional)
@@ -122,7 +123,7 @@ sub new {
   if( defined $alleles ) {
       if( ref($alleles) =~ /array/i ) {
 	  $self->add_Allele(@$alleles);
-      } else { 
+      } else {
 	  $self->warn("Could not initialize with -alleles value, it is not an array ref");
       }
   }
@@ -152,7 +153,7 @@ sub marker_name{
  Title   : marker_type
  Usage   : my $name = $genotype->marker_type();
  Function: Get the marker type for a genotype result
- Returns : M (microsatellite, or other multi-allelic 
+ Returns : M (microsatellite, or other multi-allelic
            locus) or S (biallelic/SNP locus)
  Args    : [optional] marker type value to store
 
@@ -172,7 +173,7 @@ sub marker_type{
  Usage   : my $indid = $genotype->individual_id();
  Function: Gets the individual id associated with a genotype
            This is effectively a back reference since we will typically
-           associate a genotype with an individual with an 
+           associate a genotype with an individual with an
            individual HAS-A genotype relationship.
  Returns : unique id string for an individual
  Args    : none
@@ -192,7 +193,7 @@ sub individual_id {
  Usage   : my @alleles = $genotype->get_Alleles();
  Function: Get the alleles for a given marker and individual
  Returns : array of alleles (strings in this implementation)
- Args    : $showblank - boolean flag to indicate return ALL alleles not 
+ Args    : $showblank - boolean flag to indicate return ALL alleles not
                         skipping the coded EMPTY alleles
 
  Note    : Uses the class variable $BlankAlleles to test if alleles
@@ -202,15 +203,15 @@ sub individual_id {
 
 sub get_Alleles{
     my ($self) = shift;
-    
+
      if( @_ && $_[0] ) {
 	return @{$self->{'_alleles'} || []};
     } else {
 	if( defined $self->{'_cached_noblank'} ) {
-	    return @{$self->{'_cached_noblank'}} 
+	    return @{$self->{'_cached_noblank'}}
 	}
 	# one liners - woo hoo.
-	$self->{'_cached_noblank'} = [ grep { ! /^\s*$BlankAlleles\s*$/o } 
+	$self->{'_cached_noblank'} = [ grep { ! /^\s*$BlankAlleles\s*$/o }
 				       @{$self->{'_alleles'} || []}];
 	return @{$self->{'_cached_noblank'}};
     }
@@ -221,9 +222,9 @@ sub get_Alleles{
  Title   : add_Allele
  Usage   : $genotype->add_Allele(@alleles);
  Function: Add alleles to the genotype, at this point there is no
-           verification to insure that haploid individuals only have 1 
+           verification to insure that haploid individuals only have 1
            allele or that diploids only have 2 - we assume that is
-           done by the user creating these objects 
+           done by the user creating these objects
  Returns : count of the number of alleles in genotype
  Args    : Array of alleles to store
 
@@ -232,7 +233,7 @@ sub get_Alleles{
 
 sub add_Allele {
     my ($self) = shift;
-    $self->{'_cached_noblank'} = undef;    
+    $self->{'_cached_noblank'} = undef;
     push @{$self->{'_alleles'}}, @_;
     return scalar @{$self->{'_alleles'}};
 }

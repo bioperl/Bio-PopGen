@@ -1,7 +1,7 @@
 #
 # BioPerl module for Bio::PopGen::Marker
 #
-# Please direct questions and support issues to <bioperl-l@bioperl.org> 
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
 # Cared for by Jason Stajich <jason@bioperl.org>
 #
@@ -43,15 +43,15 @@ the Bioperl mailing list.  Your participation is much appreciated.
   bioperl-l@bioperl.org                  - General discussion
   http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
-=head2 Support 
+=head2 Support
 
 Please direct usage questions or support issues to the mailing list:
 
 I<bioperl-l@bioperl.org>
 
-rather than to the module maintainer directly. Many experienced and 
-reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem 
+rather than to the module maintainer directly. Many experienced and
+reponsive experts will be able look at the problem and quickly
+address it. Please include a thorough description of the problem
 with code and data examples if at all possible.
 
 =head2 Reporting Bugs
@@ -82,6 +82,7 @@ Internal methods are usually preceded with a _
 
 
 package Bio::PopGen::Marker;
+
 use strict;
 
 # Object preamble - inherits from Bio::Root::Root
@@ -97,13 +98,13 @@ use base qw(Bio::Root::Root Bio::PopGen::MarkerI);
 
  Title   : new
  Usage   : my $obj = Bio::PopGen::Marker->new();
- Function: Builds a new Bio::PopGen::Marker object 
+ Function: Builds a new Bio::PopGen::Marker object
  Returns : an instance of Bio::PopGen::Marker
  Args    : -name          => [string] marker name
            -description   => [string] marker description
            -type          => [string] marker type
            -unique_id     => [string/int] unique id
-           -allele_freq   => [hash ref] allele frequencies 
+           -allele_freq   => [hash ref] allele frequencies
 
 =cut
 
@@ -122,7 +123,7 @@ sub new {
   }
   if( defined $name) {
       $self->name($name);
-  } else { 
+  } else {
       $self->throw("Must provide a name when initializing a Marker");
   }
   defined $desc && $self->description($desc);
@@ -131,7 +132,7 @@ sub new {
   if( defined $af) {
       if( ref($af) !~ /HASH/i ) {
 	  $self->warn("Must provide valid Hash reference for allele_freq method");
-      } else { 
+      } else {
 	  foreach my $allele ( keys %$af ) {
 	      $self->add_Allele_Frequency($allele, $af->{$allele});
 	  }
@@ -312,18 +313,18 @@ sub reset_alleles{
 
  Title   : marker_coverage
  Usage   : $marker->marker_coverage();
- Function: Get marker coverage, that is, the number of 
-           individuals where the marker is present 
+ Function: Get marker coverage, that is, the number of
+           individuals where the marker is present
            excluding missing or ambiguous alleles
  Returns : integer, representing marker coverage
- Args    : 
+ Args    :
 
 
 =cut
 
 sub marker_coverage{
     my ($self) = @_;
- 
+
     return $self->{_marker_coverage};
 }
 

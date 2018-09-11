@@ -1,6 +1,6 @@
 # module Bio::PopGen::TagHaplotype.pm
 #
-# Please direct questions and support issues to <bioperl-l@bioperl.org> 
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
 # Cared for by Pedro M. Gomez-Fabre <pgf18872-at-gsk-dot-com>
 #
@@ -52,15 +52,15 @@ the Bioperl mailing list.  Your participation is much appreciated.
   bioperl-l@bioperl.org                  - General discussion
   http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
-=head2 Support 
+=head2 Support
 
 Please direct usage questions or support issues to the mailing list:
 
 I<bioperl-l@bioperl.org>
 
-rather than to the module maintainer directly. Many experienced and 
-reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem 
+rather than to the module maintainer directly. Many experienced and
+reponsive experts will be able look at the problem and quickly
+address it. Please include a thorough description of the problem
 with code and data examples if at all possible.
 
 =head2 Reporting Bugs
@@ -81,6 +81,7 @@ Email pgf18872-at-gsk-dot-com
 # Let the code begin...
 
 package Bio::PopGen::TagHaplotype;
+
 use strict;
 
 use Data::Dumper;
@@ -136,7 +137,7 @@ sub new{
     if ($tag_list){
         $self ->tag_list($tag_list);
     }
-    else { 
+    else {
         $self ->tag_list(undef);
     }
 
@@ -168,15 +169,15 @@ sub haplotype_block{
 }
 
 
-=head2 input_block 
+=head2 input_block
 
- Title   : input_block 
+ Title   : input_block
  Usage   : $obj->input_block()
  Function: returns haplotype block. By now will produce the same output than
            $self->haplotype_block. but for compatibility, this method is kept.
            This method is deprecated.
- Returns : reference to array of array with the haplotype input value 
- Args    : none 
+ Returns : reference to array of array with the haplotype input value
+ Args    : none
  Status  : public
 
 =cut
@@ -192,11 +193,11 @@ sub input_block{
 
 =head2 tag_list
 
- Title   : tag_list 
+ Title   : tag_list
  Usage   : $obj->tag_list()
  Function: returns the list of SNPs combination that identify the
            haplotype. All combinations are displayed as arrays
- Returns : reference to array of array. 
+ Returns : reference to array of array.
  Args    : none
  Status  : public
 
@@ -210,12 +211,12 @@ sub tag_list{
     return $self->{'_tag_list'};
 }
 
-=head2 tag_length 
+=head2 tag_length
 
- Title   : tag_length 
+ Title   : tag_length
  Usage   : $obj->tag_length()
  Function: returns the length of the tag.
- Returns : scalar 
+ Returns : scalar
  Args    : none
  Status  : public
 
@@ -229,12 +230,12 @@ sub tag_length{
     return $self ->{'_tag_length'};
 }
 
-=head2 _scan_snp 
+=head2 _scan_snp
 
- Title   : _scan_snp 
+ Title   : _scan_snp
  Usage   : internal
  Function: scan sets increasing the length until find a non degenerated
-           pattern. 
+           pattern.
  Returns : scalar
  Args    : none
  Status  : private
@@ -255,7 +256,7 @@ sub _scan_snp{
         my $snp_collection = _scan_combinations($hap, $list);
 
         # if there is any element on the collection.
-        # We have reached our goal and 
+        # We have reached our goal and
         # we can stop the calculation.
         if($#$snp_collection>-1){
             return $snp_collection;
@@ -265,7 +266,7 @@ sub _scan_snp{
 
 =head2 _gen_comb
 
- Title   : _gen_comb 
+ Title   : _gen_comb
  Usage   : internal
  Function: we supply the length of the haplotype and the length of the
            word we need to find and the functions returns the possible
@@ -284,7 +285,7 @@ sub _gen_comb{
 
     my @array = ();    # list with all elements we have to combine
 
-    
+
     for(0..$hap_length-1){ push @array, $_ };
 
     #
@@ -306,9 +307,9 @@ sub _gen_comb{
 
 }
 
-=head2 _generateCombinations 
+=head2 _generateCombinations
 
- Title   : _generateCombinations 
+ Title   : _generateCombinations
  Usage   : internal
  Function: Recursive function that produce all combinations for a set
 
@@ -361,9 +362,9 @@ sub _generateCombinations{
 # Will return a list of valid combinations (SNP Tags)
 #
 
-=head2 _scan_combinations 
+=head2 _scan_combinations
 
- Title   : _scan_combinations 
+ Title   : _scan_combinations
  Usage   : internal
  Function: take the haplotype and a list of possible combination
            for that length. Generate a subset and scan it to find if
@@ -422,7 +423,7 @@ sub _get_subArray {
     my($hap, $combination) =@_;
 
     my $out = [];    # output array to be tested
- 
+
     for my $i (0..$#$hap){
         foreach(@$combination){
             push @{$out->[$i]}, $hap->[$i][$_];

@@ -1,7 +1,7 @@
 #
 # BioPerl module for Bio::PopGen::PopStats
 #
-# Please direct questions and support issues to <bioperl-l@bioperl.org> 
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
 # Cared for by Jason Stajich <jason-at-bioperl.org>
 #
@@ -19,7 +19,7 @@ statistics about a population or sets of populations
 =head1 SYNOPSIS
 
   use Bio::PopGen::PopStats;
-  my $stats = Bio::PopGen::PopStats->new(); # add -haploid => 1 
+  my $stats = Bio::PopGen::PopStats->new(); # add -haploid => 1
                                            # to process haploid data
 
 =head1 DESCRIPTION
@@ -37,15 +37,15 @@ the Bioperl mailing list.  Your participation is much appreciated.
   bioperl-l@bioperl.org                  - General discussion
   http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
-=head2 Support 
+=head2 Support
 
 Please direct usage questions or support issues to the mailing list:
 
 I<bioperl-l@bioperl.org>
 
-rather than to the module maintainer directly. Many experienced and 
-reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem 
+rather than to the module maintainer directly. Many experienced and
+reponsive experts will be able look at the problem and quickly
+address it. Please include a thorough description of the problem
 with code and data examples if at all possible.
 
 =head2 Reporting Bugs
@@ -76,6 +76,7 @@ Internal methods are usually preceded with a _
 
 
 package Bio::PopGen::PopStats;
+
 use strict;
 
 # Object preamble - inherits from Bio::Root::Root
@@ -88,7 +89,7 @@ use base qw(Bio::Root::Root);
 
  Title   : new
  Usage   : my $obj = Bio::PopGen::PopStats->new();
- Function: Builds a new Bio::PopGen::PopStats object 
+ Function: Builds a new Bio::PopGen::PopStats object
  Returns : an instance of Bio::PopGen::PopStats
  Args    : -haploid => 1 (if want to use haploid calculations)
 
@@ -109,7 +110,7 @@ sub new {
 
  Title   : haploid_status
  Usage   : $obj->haploid_status($newval)
- Function: Boolean value for whether or not to do haploid 
+ Function: Boolean value for whether or not to do haploid
            or diploid calculations, where appropriate
  Returns : Boolean
  Args    : on set, new boolean value optional)
@@ -144,8 +145,8 @@ sub haploid_status{
 sub Fst {
    my ($self,$populations,$markernames) = @_;
 
-   if( ! defined $populations || 
-       ref($populations) !~ /ARRAY/i ) { 
+   if( ! defined $populations ||
+       ref($populations) !~ /ARRAY/i ) {
        $self->warn("Must provide a valid arrayref for populations");
        return;
    } elsif( ! defined $markernames ||
@@ -161,7 +162,7 @@ sub Fst {
    }
 
    # This code assumes that pop 1 contains at least one of all the
-   # alleles - need to do some more work to insure that the complete 
+   # alleles - need to do some more work to insure that the complete
    # set of alleles is seen.
    my $Fst;
    my ($TS_sub1,$TS_sub2);
@@ -169,7 +170,7 @@ sub Fst {
    foreach my $marker ( @$markernames ) {
        # Get all the alleles from all the genotypes in all subpopulations
        my %allAlleles;
-       foreach my $allele ( map { $_->get_Alleles() } 
+       foreach my $allele ( map { $_->get_Alleles() }
 			    map { $_->get_Genotypes($marker) } @$populations ){
 	   $allAlleles{$allele}++;
        }
@@ -179,7 +180,7 @@ sub Fst {
 	   my $avg_samp_size         = 0; # n-bar
 	   my $avg_allele_freq       = 0; # p-tilda-A-dot
 
-	   my $total_samples_squared = 0; # 
+	   my $total_samples_squared = 0; #
 	   my $sum_heterozygote      = 0;
 
 	   my @marker_freqs;
@@ -195,13 +196,13 @@ sub Fst {
 	       $total_samples_squared += $s**2;
 
 	       my $markerobj = $pop->get_Marker($marker);
-	       if( ! defined $markerobj ) { 
+	       if( ! defined $markerobj ) {
 		   $self->warn("Could not derive Marker for $marker ".
 			       "from population ". $pop->name);
 		   return;
 	       }
 
-	       my $freq_homozygotes = 
+	       my $freq_homozygotes =
 		   $pop->get_Frequency_Homozygotes($marker,$allele_name);
 	       my %af = $markerobj->get_Allele_Frequencies();
 	       my $all_freq = ( ($af{$allele_name} || 0));
@@ -225,7 +226,7 @@ sub Fst {
 	   foreach my $pop ( @$populations ) {
 	       my $s = $pop->get_number_individuals($marker);
 	       my %af = %{$marker_freqs[$i++]};
-	       $sum_variance += $s * (( ($af{$allele_name} || 0) - 
+	       $sum_variance += $s * (( ($af{$allele_name} || 0) -
 					$avg_allele_freq)**2);
 	   }
 	   $variance = ( 1 / (( $num_sub_pops-1)*$avg_samp_size))*$sum_variance;
@@ -236,15 +237,15 @@ sub Fst {
 	   if( $self->haploid_status ) {
 	       # Haploid calculations
 
-	       my $T_sub1 = $variance - 
+	       my $T_sub1 = $variance -
 		   ( ( 1/($avg_samp_size-1))*
 		     ( ($avg_allele_freq*(1-$avg_allele_freq))-
 		       ( (($num_sub_pops-1)/$num_sub_pops)*$variance)));
 	       my $T_sub2 = ( (($adj_samp_size-1)/($avg_samp_size-1))*
 			      $avg_allele_freq*(1-$avg_allele_freq) ) +
 			      ( 1 + ( (($num_sub_pops-1)*
-				       ($avg_samp_size-$adj_samp_size))/ 
-				      ($avg_samp_size - 1))) * 
+				       ($avg_samp_size-$adj_samp_size))/
+				      ($avg_samp_size - 1))) *
 				      ($variance/$num_sub_pops);
 
 
@@ -255,21 +256,21 @@ sub Fst {
 	       $TS_sub1 += $T_sub1;
 	       $TS_sub2 += $T_sub2;
 
-	   } else { 
+	   } else {
 	       my $S_sub1 = $variance - ( (1/($avg_samp_size-1))*
 					  ( ($avg_allele_freq*
-					     (1-$avg_allele_freq)) - 
+					     (1-$avg_allele_freq)) -
 					    ((($num_sub_pops-1)/$num_sub_pops)*
 					     $variance)-0.25*$freq_heterozygote ) );
-	       my $S_sub2 = ($avg_allele_freq*(1-$avg_allele_freq)) - 
+	       my $S_sub2 = ($avg_allele_freq*(1-$avg_allele_freq)) -
 		   ( ($avg_samp_size/($num_sub_pops*($avg_samp_size-1)))*
 		     ( ((($num_sub_pops*($avg_samp_size- $adj_samp_size))/
 			 $avg_samp_size)*$avg_allele_freq*
-			(1-$avg_allele_freq)) - 
+			(1-$avg_allele_freq)) -
 		       ( (1/$avg_samp_size)* (($avg_samp_size-1)+
 					      ($num_sub_pops-1)*
 					      ($avg_samp_size-
-					       $adj_samp_size) )*$variance ) - 
+					       $adj_samp_size) )*$variance ) -
 		       ( (($num_sub_pops*($avg_samp_size-$adj_samp_size))/
 			  (4*$avg_samp_size*$adj_samp_size))*
 			 $freq_heterozygote ) ) );
@@ -279,10 +280,10 @@ sub Fst {
 
 	       #Again, to get the average over many alleles or many loci,
 	       #we will have to run the above for each and then sum the $S
-	       #variables and recalculate the F statistics 
+	       #variables and recalculate the F statistics
 	       $TS_sub1 += $S_sub1;
 	       $TS_sub2 += $S_sub2;
-	   } 
+	   }
        }
    }
    # $Fst_diploid = $S_sub1/$S_sub2;

@@ -1,7 +1,7 @@
 #
 # BioPerl module for Bio::PopGen::Simulation::GeneticDrift
 #
-# Please direct questions and support issues to <bioperl-l@bioperl.org> 
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
 # Cared for by Jason Stajich <jason-at-bioperl-dot-org>
 #
@@ -27,7 +27,7 @@ Bio::PopGen::Simulation::GeneticDrift - A simple genetic drift simulation
 
   for(my $i =0 ;$i < 10; $i++ ) {
     # get the allele freqs as part of a Bio::PopGen::Population object
-    my $pop = $sim->next_generation('population'); 
+    my $pop = $sim->next_generation('population');
   }
 
 =head1 DESCRIPTION
@@ -52,15 +52,15 @@ the Bioperl mailing list.  Your participation is much appreciated.
   bioperl-l@bioperl.org                  - General discussion
   http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
-=head2 Support 
+=head2 Support
 
 Please direct usage questions or support issues to the mailing list:
 
 I<bioperl-l@bioperl.org>
 
-rather than to the module maintainer directly. Many experienced and 
-reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem 
+rather than to the module maintainer directly. Many experienced and
+reponsive experts will be able look at the problem and quickly
+address it. Please include a thorough description of the problem
 with code and data examples if at all possible.
 
 =head2 Reporting Bugs
@@ -87,6 +87,7 @@ Internal methods are usually preceded with a _
 
 
 package Bio::PopGen::Simulation::GeneticDrift;
+
 use strict;
 
 use Bio::PopGen::Population;
@@ -97,13 +98,13 @@ use base qw(Bio::Root::Root);
 
  Title   : new
  Usage   : my $obj = Bio::PopGen::Simulation::GeneticDrift->new();
- Function: Builds a new Bio::PopGen::Simulation::GeneticDrift object 
+ Function: Builds a new Bio::PopGen::Simulation::GeneticDrift object
  Returns : an instance of Bio::PopGen::Simulation::GeneticDrift
  Args    : -popsize => starting N
-           -haploid => boolean if we should simulate haploids 
+           -haploid => boolean if we should simulate haploids
            -alleles => arrayref of the allele names
            OR
-           -population => L<Bio::PopGen::PopulationI> object to initialize 
+           -population => L<Bio::PopGen::PopulationI> object to initialize
                           from some previously defined Population object
                           (or result from a previous simulation)
 
@@ -125,12 +126,12 @@ sub new {
       while( my ($allele,$freq) = each %f ) {
 	  $self->add_Allele_Frequency($allele,$freq);
       }
-  } else { 
-      $self->population_size($popsize);  
-  
+  } else {
+      $self->population_size($popsize);
+
       if( ! defined $alleles || ref($alleles) !~ /HASH/i  ) {
 	  $self->throw("Must provide a valid set of initial allele frequencies to $class as an hashref");
-      } 
+      }
       while( my ($allele,$freq) = each %$alleles ) {
 	  $self->add_Allele_Frequency($allele,$freq);
       }
@@ -149,7 +150,7 @@ sub new {
  Function: Get the next generation of allele frequencies based on the current
            generation
  Returns : Hash of allele frequencies
- Args    : 'allelefreqs' or 'population' to get back a hash of allele 
+ Args    : 'allelefreqs' or 'population' to get back a hash of allele
                  frequencies (default) OR a L<Bio::PopGen::Population> object
 
 
@@ -158,9 +159,9 @@ sub new {
 sub next_generation{
    my ($self,$rettype) = @_;
    my %initial = $self->get_Allele_Frequencies;
-   my $popsize = $self->population_size || 
+   my $popsize = $self->population_size ||
        $self->throw("Need to have set a valid population size when running the simulation");
-   # we're going to construct a mapping of the rational space from 0->1 
+   # we're going to construct a mapping of the rational space from 0->1
    # which will map to a particular allele and be proportional to it
    # frequency
    my ($last,@mapping) = (0);
@@ -188,11 +189,11 @@ sub next_generation{
        $f /= $popsize;
    }
    %{$self->{'_allele_freqs'}} = %f;
-   
-   if( defined $rettype && 
+
+   if( defined $rettype &&
        $rettype =~ /population/i) {
        return Bio::PopGen::Poulation->new(-frequencies => \%f);
-   } else { 
+   } else {
        return %f;
    }
 
@@ -202,8 +203,8 @@ sub next_generation{
 
  Title   : population_size
  Usage   : $obj->population_size($newval)
- Function: 
- Example : 
+ Function:
+ Example :
  Returns : value of population_size (a scalar)
  Args    : on set, new value (a scalar or undef, optional)
 
@@ -304,7 +305,7 @@ sub validate_Frequencies{
    my ($strict) = $self->_rearrange([qw(STRICT)], @args);
    my $sum = 0;
    my %freq = $self->get_Allele_Frequencies;
-   foreach my $f ( values %freq ) { 
+   foreach my $f ( values %freq ) {
        $sum += $f;
    }
    return ($strict) ? $sum == 1 : $sum <= 1;

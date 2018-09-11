@@ -1,7 +1,7 @@
 #
 # BioPerl module for Bio::PopGen::Statistics
 #
-# Please direct questions and support issues to <bioperl-l@bioperl.org> 
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
 # Cared for by Jason Stajich <jason-at-bioperl-dot-org>
 #
@@ -13,7 +13,7 @@
 
 =head1 NAME
 
-Bio::PopGen::Statistics - Population Genetics statistical tests  
+Bio::PopGen::Statistics - Population Genetics statistical tests
 
 =head1 SYNOPSIS
 
@@ -53,7 +53,7 @@ Bio::PopGen::Statistics - Population Genetics statistical tests
   my $in = Bio::AlignIO->new(-file   => 't/data/t7.aln',
                             -format => 'clustalw');
   my $aln = $in->next_aln;
-  # get a population, each sequence is an individual and 
+  # get a population, each sequence is an individual and
   # for the default case, every site which is not monomorphic
   # is a 'marker'.  Each individual will have a 'genotype' for the
   # site which will be the specific base in the alignment at that
@@ -111,7 +111,7 @@ hypothesis by DNA polymorphism." Genetics 123:585-595.
 
 Please see this reference for use of this implementation.
 
-Stajich JE and Hahn MW "Disentangling the Effects of Demography and Selection in Human History." (2005) Mol Biol Evol 22(1):63-73. 
+Stajich JE and Hahn MW "Disentangling the Effects of Demography and Selection in Human History." (2005) Mol Biol Evol 22(1):63-73.
 
 If you use these Bio::PopGen modules please cite the Bioperl
 publication (see FAQ) and the above reference.
@@ -128,15 +128,15 @@ the Bioperl mailing list.  Your participation is much appreciated.
   bioperl-l@bioperl.org                  - General discussion
   http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
-=head2 Support 
+=head2 Support
 
 Please direct usage questions or support issues to the mailing list:
 
 I<bioperl-l@bioperl.org>
 
-rather than to the module maintainer directly. Many experienced and 
-reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem 
+rather than to the module maintainer directly. Many experienced and
+reponsive experts will be able look at the problem and quickly
+address it. Please include a thorough description of the problem
 with code and data examples if at all possible.
 
 =head2 Reporting Bugs
@@ -168,8 +168,9 @@ Internal methods are usually preceded with a _
 
 
 package Bio::PopGen::Statistics;
+
 use strict;
-use constant { 
+use constant {
     in_label => 'ingroup',
     out_label => 'outgroup',
     non_syn   => 'non_synonymous',
@@ -198,7 +199,7 @@ BEGIN {
 
  Title   : new
  Usage   : my $obj = Bio::PopGen::Statistics->new();
- Function: Builds a new Bio::PopGen::Statistics object 
+ Function: Builds a new Bio::PopGen::Statistics object
  Returns : an instance of Bio::PopGen::Statistics
  Args    : none
 
@@ -216,31 +217,31 @@ BEGIN {
            given an outgroup and the number of external mutations
            (either provided or calculated from list of outgroup individuals)
  Returns : decimal
- Args    : $individuals - array reference which contains ingroup individuals 
+ Args    : $individuals - array reference which contains ingroup individuals
            (L<Bio::PopGen::Individual> or derived classes)
            $extmutations - number of external mutations OR
            arrayref of outgroup individuals
 
 =cut
 
-sub fu_and_li_D { 
+sub fu_and_li_D {
     my ($self,$ingroup,$outgroup) = @_;
 
     my ($seg_sites,$n,$ancestral,$derived) = (0,0,0,0);
     if( ref($ingroup) =~ /ARRAY/i ) {
 	$n = scalar @$ingroup;
-	# pi - all pairwise differences 
+	# pi - all pairwise differences
 	$seg_sites   = $self->segregating_sites_count($ingroup);
-    } elsif( ref($ingroup) && 
+    } elsif( ref($ingroup) &&
 	     $ingroup->isa('Bio::PopGen::PopulationI')) {
 	$n = $ingroup->get_number_individuals;
 	$seg_sites   = $self->segregating_sites_count($ingroup);
-    } else { 
+    } else {
 	$self->throw("expected an array reference of a list of Bio::PopGen::IndividualI OR a Bio::PopGen::PopulationI object to fu_and_li_D");
 	return 0;
     }
-    
-    if( $seg_sites <= 0 ) { 
+
+    if( $seg_sites <= 0 ) {
 	$self->warn("mutation total was not > 0, cannot calculate a Fu and Li D");
 	return 0;
     }
@@ -251,10 +252,10 @@ sub fu_and_li_D {
     } elsif( ref($outgroup) ) {
 	($ancestral,$derived) = $self->derived_mutations($ingroup,$outgroup);
 	$ancestral = 0 unless defined $ancestral;
-    } else { 
+    } else {
 	$ancestral = $outgroup;
     }
-   
+
     return $self->fu_and_li_D_counts($n,$seg_sites,
 				     $ancestral,$derived);
 }
@@ -292,15 +293,15 @@ sub fu_and_li_D_counts {
     my $c = 2 * ( ( ( $n * $a_n ) - (2 * ( $n -1 ))) /
                   ( ( $n - 1) * ( $n - 2 ) ) );
 
-    my $v = 1 + ( ( $a_n**2 / ( $b + $a_n**2 ) ) * 
+    my $v = 1 + ( ( $a_n**2 / ( $b + $a_n**2 ) ) *
 		  ( $c - ( ( $n + 1) /
 			   ( $n - 1) ) ));
-    
+
     my $u = $a_n - 1 - $v;
 
-    ($seg_sites - $a_n * $external_mut) / 
+    ($seg_sites - $a_n * $external_mut) /
 	sqrt( ($u * $seg_sites) + ($v * $seg_sites*$seg_sites));
-    
+
 }
 
 
@@ -328,13 +329,13 @@ sub fu_and_li_D_star {
 	$n = scalar @$individuals;
 	$seg_sites   = $self->segregating_sites_count($individuals);
 	$singletons  = $self->singleton_count($individuals);
-    } elsif( ref($individuals) && 
+    } elsif( ref($individuals) &&
 	     $individuals->isa('Bio::PopGen::PopulationI')) {
 	my $pop = $individuals;
 	$n = $pop->get_number_individuals;
 	$seg_sites   = $self->segregating_sites_count($pop);
 	$singletons  = $self->singleton_count($pop);
-    } else { 
+    } else {
 	$self->throw("expected an array reference of a list of Bio::PopGen::IndividualI OR a Bio::PopGen::PopulationI object to fu_and_li_D_star");
 	return 0;
     }
@@ -376,10 +377,10 @@ sub fu_and_li_D_star_counts {
                   ( ( $n - 1) * ( $n - 2 ) ) );
 
     my $d = $c + ($n -2) / ($n - 1)**2 +
-	2 / ($n -1) * 
-	( 1.5 - ( (2*$a1 - 3) / ($n -2) ) - 
-	  1 / $n ); 
-    
+	2 / ($n -1) *
+	( 1.5 - ( (2*$a1 - 3) / ($n -2) ) -
+	  1 / $n );
+
     my $v_star = ( ( ($n/($n-1) )**2)*$b + (($a_n**2)*$d) -
 		 (2*( ($n*$a_n*($a_n+1)) )/(($n-1)**2)) )  /
 		   (($a_n**2) + $b);
@@ -389,8 +390,8 @@ sub fu_and_li_D_star_counts {
 			  ($n-1)))) - $v_star;
 
 
-    return (($n / ($n - 1)) * $seg_sites - 
-	    $a_n * $singletons) / 
+    return (($n / ($n - 1)) * $seg_sites -
+	    $a_n * $singletons) /
 	    sqrt( ($u_star * $seg_sites) + ($v_star * $seg_sites*$seg_sites));
 }
 
@@ -399,7 +400,7 @@ sub fu_and_li_D_star_counts {
 
  Title   : fu_and_li_F
  Usage   : my $F = Bio::PopGen::Statistics->fu_and_li_F(\@ingroup,$ext_muts);
- Function: Calculate Fu and Li's F on an ingroup with either the set of 
+ Function: Calculate Fu and Li's F on an ingroup with either the set of
            outgroup individuals, or the number of external mutations
  Returns : decimal number
  Args    : array ref of L<Bio::PopGen::IndividualI> objects for the ingroup
@@ -415,25 +416,25 @@ sub fu_and_li_F {
     my ($seg_sites,$pi,$n,$external,$internal);
     if( ref($ingroup) =~ /ARRAY/i ) {
 	$n = scalar @$ingroup;
-	# pi - all pairwise differences 
-	$pi          = $self->pi($ingroup);  
+	# pi - all pairwise differences
+	$pi          = $self->pi($ingroup);
 	$seg_sites   = $self->segregating_sites_count($ingroup);
-    } elsif( ref($ingroup) && 
+    } elsif( ref($ingroup) &&
 	     $ingroup->isa('Bio::PopGen::PopulationI')) {
 	$n = $ingroup->get_number_individuals;
 	$pi          = $self->pi($ingroup);
 	$seg_sites   = $self->segregating_sites_count($ingroup);
-    } else { 
+    } else {
 	$self->throw("expected an array reference of a list of Bio::PopGen::IndividualI OR a Bio::PopGen::PopulationI object to Fu and Li's F");
 	return 0;
     }
-    
+
     if( ! defined $outgroup ) {
 	$self->warn("Need to provide either an array ref to the outgroup individuals or the number of external mutations");
 	return 0;
     } elsif( ref($outgroup) ) {
 	($external,$internal) = $self->derived_mutations($ingroup,$outgroup);
-    } else { 
+    } else {
 	$external = $outgroup;
     }
     $self->fu_and_li_F_counts($n,$pi,$seg_sites,$external);
@@ -470,10 +471,10 @@ sub fu_and_li_F_counts {
 	$b += ( 1 / $k**2 );
     }
 
-    my $c = 2 * ( ( ( $n * $a_n ) - (2 * ( $n -1 ))) / 
+    my $c = 2 * ( ( ( $n * $a_n ) - (2 * ( $n -1 ))) /
 		  ( ( $n - 1) * ( $n - 2 ) ) );
 
-    my $v_F = ( $c + ( (2*(($n**2)+$n+3)) / 
+    my $v_F = ( $c + ( (2*(($n**2)+$n+3)) /
 		       ( (9*$n)*($n-1) ) ) -
 		(2/($n-1)) ) / ( ($a_n**2)+$b );
 
@@ -494,7 +495,7 @@ sub fu_and_li_F_counts {
  Title   : fu_and_li_F_star
  Usage   : my $F = Bio::PopGen::Statistics->fu_and_li_F_star(\@ingroup);
  Function: Calculate Fu and Li's F* on an ingroup without an outgroup
-           It uses count of singleton alleles instead 
+           It uses count of singleton alleles instead
  Returns : decimal number
  Args    : array ref of L<Bio::PopGen::IndividualI> objects for the ingroup
            OR
@@ -510,18 +511,18 @@ sub fu_and_li_F_star {
     my ($seg_sites,$pi,$n,$singletons);
     if( ref($individuals) =~ /ARRAY/i ) {
 	$n = scalar @$individuals;
-	# pi - all pairwise differences 
-	$pi          = $self->pi($individuals);  
+	# pi - all pairwise differences
+	$pi          = $self->pi($individuals);
 	$seg_sites   = $self->segregating_sites_count($individuals);
 	$singletons  = $self->singleton_count($individuals);
-    } elsif( ref($individuals) && 
+    } elsif( ref($individuals) &&
 	     $individuals->isa('Bio::PopGen::PopulationI')) {
 	my $pop = $individuals;
 	$n = $pop->get_number_individuals;
 	$pi          = $self->pi($pop);
 	$seg_sites   = $self->segregating_sites_count($pop);
 	$singletons  = $self->singleton_count($pop);
-    } else { 
+    } else {
 	$self->throw("expected an array reference of a list of Bio::PopGen::IndividualI OR a Bio::PopGen::PopulationI object to fu_and_li_F_star");
 	return 0;
     }
@@ -529,7 +530,7 @@ sub fu_and_li_F_star {
 					  $pi,
 					  $seg_sites,
 					  $singletons);
-} 
+}
 
 =head2 fu_and_li_F_star_counts
 
@@ -554,12 +555,12 @@ sub fu_and_li_F_star_counts {
 	$self->warn("N must be > 1\n");
 	return;
     }
-    if( $n == 2) { 
+    if( $n == 2) {
 	return 0;
-    } 
+    }
 
     my $a_n = 0;
-    
+
 
     my $b = 0;
     for(my $k= 1; $k < $n; $k++ ) {
@@ -574,9 +575,9 @@ sub fu_and_li_F_star_counts {
     my $v_F_star = ( (( 2 * $n ** 3 + 110 * $n**2 - (255 * $n) + 153)/
 		      (9 * ($n ** 2) * ( $n - 1))) +
 		     ((2 * ($n - 1) * $a_n ) / $n ** 2) -
-		     (8 * $b / $n) ) / 
+		     (8 * $b / $n) ) /
 		     ( ($a_n ** 2) + $b );
-    
+
     my $u_F_star = ((( (4* ($n**2)) + (19 * $n) + 3 - (12 * ($n + 1)* $a1)) /
 		    (3 * $n * ( $n - 1))) / $a_n) - $v_F_star;
 
@@ -590,10 +591,10 @@ sub fu_and_li_F_star_counts {
 
  Title   : tajima_D
  Usage   : my $D = Bio::PopGen::Statistics->tajima_D(\@samples);
- Function: Calculate Tajima's D on a set of samples 
+ Function: Calculate Tajima's D on a set of samples
  Returns : decimal number
  Args    : array ref of L<Bio::PopGen::IndividualI> objects
-           OR 
+           OR
            L<Bio::PopGen::PopulationI> object
 
 
@@ -607,17 +608,17 @@ sub tajima_D {
 
     if( ref($individuals) =~ /ARRAY/i ) {
 	$n = scalar @$individuals;
-	# pi - all pairwise differences 
-	$pi          = $self->pi($individuals);  
+	# pi - all pairwise differences
+	$pi          = $self->pi($individuals);
 	$seg_sites = $self->segregating_sites_count($individuals);
 
-    } elsif( ref($individuals) && 
+    } elsif( ref($individuals) &&
 	     $individuals->isa('Bio::PopGen::PopulationI')) {
 	my $pop = $individuals;
 	$n = $pop->get_number_individuals;
 	$pi          = $self->pi($pop);
 	$seg_sites = $self->segregating_sites_count($pop);
-    } else { 
+    } else {
 	$self->throw("expected an array reference of a list of Bio::PopGen::IndividualI OR a Bio::PopGen::PopulationI object to tajima_D");
 	return 0;
     }
@@ -641,7 +642,7 @@ sub tajima_D {
 
 sub tajima_D_counts {
     my ($self,$n,$seg_sites,$pi) = @_;
-    my $a1 = 0; 
+    my $a1 = 0;
     for(my $k= 1; $k < $n; $k++ ) {
 	$a1 += ( 1 / $k );
     }
@@ -650,16 +651,16 @@ sub tajima_D_counts {
      for(my $k= 1; $k < $n; $k++ ) {
 	 $a2 += ( 1 / $k**2 );
      }
-    
+
     my $b1 = ( $n + 1 ) / ( 3* ( $n - 1) );
-    my $b2 = ( 2 * ( $n ** 2 + $n + 3) ) / 
+    my $b2 = ( 2 * ( $n ** 2 + $n + 3) ) /
 	     ( ( 9 * $n) * ( $n - 1) );
     my $c1 = $b1 - ( 1 / $a1 );
     my $c2 = $b2 - ( ( $n + 2 ) /
 		     ( $a1 * $n))+( $a2 / $a1 ** 2);
     my $e1 = $c1 / $a1;
     my $e2 = $c2 / ( $a1**2 + $a2 );
-    
+
     my $denom = sqrt ( ($e1 * $seg_sites) + (( $e2 * $seg_sites) * ( $seg_sites - 1)));
     return if $denom == 0;
     my $D = ( $pi - ( $seg_sites / $a1 ) ) / $denom;
@@ -704,7 +705,7 @@ sub pi {
 		return 0;
 	    }
 	    foreach my $m ( @marker_names ) {
-		foreach my $allele (map { $_->get_Alleles} 
+		foreach my $allele (map { $_->get_Alleles}
 				    $ind->get_Genotypes($m) ) {
 		    $data{$m}->{$allele}++;
 		    $marker_total{$m}++;
@@ -763,12 +764,12 @@ sub pi {
 
  Title   : theta
  Usage   : my $theta = Bio::PopGen::Statistics->theta($sampsize,$segsites);
- Function: Calculates Watterson's theta from the sample size 
+ Function: Calculates Watterson's theta from the sample size
            and the number of segregating sites.
            Providing the third parameter, total number of sites will
            return theta per site.
-           This is also known as K-hat = K / a_n   
- Returns : decimal number 
+           This is also known as K-hat = K / a_n
+ Returns : decimal number
  Args    : sample size (integer),
            num segregating sites (integer)
            total sites (integer) [optional] (to calculate theta per site)
@@ -803,16 +804,16 @@ sub theta {
 	$n = $pop->haploid_population->get_number_individuals;
 	$seg_sites = $self->segregating_sites_count($pop);
     }
-    my $a1 = 0; 
+    my $a1 = 0;
     for(my $k= 1; $k < $n; $k++ ) {
 	$a1 += ( 1 / $k );
-    }    
+    }
     if( $totalsites ) { # 0 and undef are the same can't divide by them
 	$seg_sites /= $totalsites;
     }
-    if( $a1 == 0 ) { 
+    if( $a1 == 0 ) {
 	return 0;
-    } 
+    }
     return $seg_sites / $a1;
 }
 
@@ -835,11 +836,11 @@ sub singleton_count {
     my @inds;
     if( ref($individuals) =~ /ARRAY/ ) {
 	@inds = @$individuals;
-    } elsif( ref($individuals) && 
+    } elsif( ref($individuals) &&
 	     $individuals->isa('Bio::PopGen::PopulationI') ) {
 	my $pop = $individuals;
 	@inds = $pop->get_Individuals();
-	unless( @inds ) { 
+	unless( @inds ) {
 	    $self->warn("Need to provide a population which has individuals loaded, not just a population with allele frequencies");
 	    return 0;
 	}
@@ -851,7 +852,7 @@ sub singleton_count {
 
     my ($singleton_allele_ct,%sites) = (0);
     # first collect all the alleles into a hash structure
-    
+
     foreach my $n ( @inds ) {
 	if( ! $n->isa('Bio::PopGen::IndividualI') ) {
 	    $self->warn("Expected an arrayref of Bio::PopGen::IndividualI objects, this is a ".ref($n)."\n");
@@ -865,7 +866,7 @@ sub singleton_count {
 	}
     }
     foreach my $site ( values %sites ) { # don't really care what the name is
-	foreach my $allelect ( values %$site ) { # 
+	foreach my $allelect ( values %$site ) { #
             # find the sites which have an allele with only 1 copy
  	    $singleton_allele_ct++ if( $allelect == 1 );
 	}
@@ -884,13 +885,13 @@ sub singleton_count {
  Usage   : my $segsites = Bio::PopGen::Statistics->segregating_sites_count
  Function: Gets the number of segregating sites (number of polymorphic sites)
  Returns : (integer) number of segregating sites
- Args    : arrayref of L<Bio::PopGen::IndividualI> objects 
+ Args    : arrayref of L<Bio::PopGen::IndividualI> objects
            OR
            L<Bio::PopGen::PopulationI> object
 
 =cut
 
-# perhaps we'll change this in the future 
+# perhaps we'll change this in the future
 # to return the actual segregating sites
 # so one can use this to pull in the names of those sites.
 # Would be trivial if it is useful.
@@ -913,20 +914,20 @@ sub segregating_sites_count {
 	       }
 	   }
        }
-       foreach my $site ( values %sites ) { # use values b/c we don't 
+       foreach my $site ( values %sites ) { # use values b/c we don't
 	                                    # really care what the name is
 	   # find the sites which >1 allele
 	   $seg_sites++ if( keys %$site > 1 );
        }
    } elsif( $type && $individuals->isa('Bio::PopGen::PopulationI') ) {
-       foreach my $marker ( $individuals->haploid_population->get_Markers ) {  
-	   my @alleles = $marker->get_Alleles;	    
+       foreach my $marker ( $individuals->haploid_population->get_Markers ) {
+	   my @alleles = $marker->get_Alleles;
 	   $seg_sites++ if ( scalar @alleles > 1 );
        }
-   } else { 
+   } else {
        $self->warn("segregating_sites_count expects either a PopulationI object or a list of IndividualI objects");
        return 0;
-   } 
+   }
    return $seg_sites;
 }
 
@@ -950,7 +951,7 @@ Note     : p^2 + 2pq + q^2
 sub heterozygosity {
     my ($self,$samp_size, $freq1,$freq2) = @_;
     if( ! $freq2 ) { $freq2 = 1 - $freq1 }
-    if( $freq1 > 1 || $freq2 > 1 ) { 
+    if( $freq1 > 1 || $freq2 > 1 ) {
 	$self->warn("heterozygosity expects frequencies to be less than 1");
     }
     my $sum = ($freq1**2) + (($freq2)**2);
@@ -965,11 +966,11 @@ sub heterozygosity {
  Usage   : my $ext = Bio::PopGen::Statistics->derived_mutations($ingroup,$outgroup);
  Function: Calculate the number of alleles or (mutations) which are ancestral
            and the number which are derived (occurred only on the tips)
- Returns : array of 2 items - number of external and internal derived 
+ Returns : array of 2 items - number of external and internal derived
            mutation
- Args    : ingroup - L<Bio::PopGen::IndividualI>s arrayref OR 
+ Args    : ingroup - L<Bio::PopGen::IndividualI>s arrayref OR
                      L<Bio::PopGen::PopulationI>
-           outgroup- L<Bio::PopGen::IndividualI>s arrayref OR 
+           outgroup- L<Bio::PopGen::IndividualI>s arrayref OR
                      L<Bio::PopGen::PopulationI> OR
                      a single L<Bio::PopGen::IndividualI>
 
@@ -984,7 +985,7 @@ sub derived_mutations {
    my ($itype,$otype) = (ref($ingroup),ref($outgroup));
 
    return $outgroup unless( $otype ); # we expect arrayrefs or objects, nums
-                                      # are already the value we 
+                                      # are already the value we
                                       # are searching for
    # pick apart the ingroup
    # get the data
@@ -994,7 +995,7 @@ sub derived_mutations {
 	   $self->warn("Expected an arrayref of Bio::PopGen::IndividualI objects or a Population for ingroup in external_mutations");
 	   return 0;
        }
-       # we assume that all individuals have the same markers 
+       # we assume that all individuals have the same markers
        # i.e. that they are aligned
        @marker_names = $ingroup->[0]->get_marker_names;
        for my $ind ( @$ingroup ) {
@@ -1004,22 +1005,22 @@ sub derived_mutations {
 		   $indata{$m}->{$allele}++;
 	       }
 	   }
-       }	   
+       }
    } elsif( ref($ingroup) && $ingroup->isa('Bio::PopGen::PopulationI') ) {
        @marker_names = $ingroup->get_marker_names;
        for my $ind ( $ingroup->haploid_population->get_Individuals() ) {
 	   for my $m ( @marker_names ) {
-	       for my $allele ( map { $_->get_Alleles} 
+	       for my $allele ( map { $_->get_Alleles}
 				    $ind->get_Genotypes($m) ) {
 		   $indata{$m}->{$allele}++;
 	       }
 	   }
        }
-   } else { 
+   } else {
        $self->warn("Need an arrayref of Bio::PopGen::IndividualI objs or a Bio::PopGen::Population for ingroup in external_mutations");
        return 0;
    }
-    
+
    if( $otype =~ /ARRAY/i ) {
        if( ! ref($outgroup->[0]) ||
 	   ! $outgroup->[0]->isa('Bio::PopGen::IndividualI') ) {
@@ -1034,11 +1035,11 @@ sub derived_mutations {
 	       }
 	   }
        }
-   
+
    } elsif( $otype->isa('Bio::PopGen::PopulationI') ) {
        for my $ind ( $outgroup->haploid_population->get_Individuals() ) {
 	   for my $m ( @marker_names ) {
-	       for my $allele ( map { $_->get_Alleles} 
+	       for my $allele ( map { $_->get_Alleles}
 				    $ind->get_Genotypes($m) ) {
 		   $outdata{$m}->{$allele}++;
 	       }
@@ -1048,31 +1049,31 @@ sub derived_mutations {
        $self->warn("Need an arrayref of Bio::PopGen::IndividualI objs or a Bio::PopGen::Population for outgroup in external_mutations");
        return 0;
    }
-   
-   # derived mutations are defined as 
-   # 
+
+   # derived mutations are defined as
+   #
    # ingroup  (G A T)
    # outgroup (A)
    # derived mutations are G and T, A is the external mutation
-   
+
    # ingroup  (A T)
    # outgroup (C)
    # derived mutations A,T no external/ancestral mutations
-   
+
    # ingroup  (G A T)
    # outgroup (A T)
    # cannot determine
-  
+
    my ($internal,$external);
    foreach my $marker ( @marker_names ) {
        my @outalleles = keys %{$outdata{$marker}};
        my @in_alleles = keys %{$indata{$marker}};
        next if( @outalleles > 1 || @in_alleles == 1);
        for my $allele ( @in_alleles ) {
-	   if( ! exists $outdata{$marker}->{$allele} ) { 
-	       if( $indata{$marker}->{$allele} == 1 ) { 
+	   if( ! exists $outdata{$marker}->{$allele} ) {
+	       if( $indata{$marker}->{$allele} == 1 ) {
 		   $external++;
-	       } else { 
+	       } else {
 		   $internal++;
 	       }
 	   }
@@ -1086,17 +1087,17 @@ sub derived_mutations {
 
  Title   : composite_LD
  Usage   : %matrix = Bio::PopGen::Statistics->composite_LD($population);
- Function: Calculate the Linkage Disequilibrium 
-           This is for calculating LD for unphased data. 
+ Function: Calculate the Linkage Disequilibrium
+           This is for calculating LD for unphased data.
            Other methods will be appropriate for phased haplotype data.
 
  Returns : Hash of Hashes - first key is site 1,second key is site 2
            and value is LD for those two sites.
            my $LDarrayref = $matrix{$site1}->{$site2};
            my ($ldval, $chisquared) = @$LDarrayref;
- Args    : L<Bio::PopGen::PopulationI> or arrayref of 
-           L<Bio::PopGen::IndividualI>s 
- Reference: Weir B.S. (1996) "Genetic Data Analysis II", 
+ Args    : L<Bio::PopGen::PopulationI> or arrayref of
+           L<Bio::PopGen::IndividualI>s
+ Reference: Weir B.S. (1996) "Genetic Data Analysis II",
                       Sinauer, Sunderlanm MA.
 
 =cut
@@ -1106,7 +1107,7 @@ sub composite_LD {
     if( ref($pop) =~ /ARRAY/i ) {
 	if( ref($pop->[0]) && $pop->[0]->isa('Bio::PopGen::IndividualI') ) {
 	    $pop = Bio::PopGen::Population->new(-individuals => @$pop);
-	} else { 
+	} else {
 	    $self->warn("composite_LD expects a Bio::PopGen::PopulationI or an arrayref of Bio::PopGen::IndividualI objects");
 	    return ();
 	}
@@ -1122,12 +1123,12 @@ sub composite_LD {
     # calculate allele frequencies for each marker from the population
     # use the built-in get_Marker to get the allele freqs
     # we still need to calculate the genotype frequencies
-    foreach my $marker_name ( @marker_names ) {	
+    foreach my $marker_name ( @marker_names ) {
 	my(%allelef);
 
 	foreach my $ind ( @inds ) {
 	    my ($genotype) = $ind->get_Genotypes(-marker => $marker_name);
-	    if( ! defined $genotype ) { 
+	    if( ! defined $genotype ) {
 		$self->warn("no genotype for marker $marker_name for individual ". $ind->unique_id. "\n");
 		next;
 	    }
@@ -1143,13 +1144,13 @@ sub composite_LD {
 	my @alleles      = sort keys %allelef;
 	my $allele_count = scalar @alleles;
 	# test if site is polymorphic
-	if( $allele_count != 2) { 
+	if( $allele_count != 2) {
 	    # only really warn if we're seeing multi-allele
 	    $self->warn("Skipping $marker_name because it has $allele_count alleles (".join(',',@alleles)."), \ncomposite_LD will currently only work for biallelic markers") if $allele_count > 2;
 	    next;		# skip this marker
 	}
 
-	# Need to do something here to detect alleles which aren't 
+	# Need to do something here to detect alleles which aren't
 	# a single character
 	if( length($alleles[0]) != 1 ||
 	    length($alleles[1]) != 1 ) {
@@ -1157,8 +1158,8 @@ sub composite_LD {
 	    next;
 	}
 
-	# fix the call for allele 1 (A or B) and 
-	# allele 2 (a or b) in terms of how we'll do the 
+	# fix the call for allele 1 (A or B) and
+	# allele 2 (a or b) in terms of how we'll do the
 	# N square from Weir p.126
 	$self->debug( "$alleles[0] is 1, $alleles[1] is 2 for $marker_name\n");
 	$lookup{$marker_name}->{'1'} = $alleles[0];
@@ -1172,15 +1173,15 @@ sub composite_LD {
 
     # standard way of generating pairwise combos
     # LD is done by comparing all the pairwise site (marker)
-    # combinations and keeping track of the genotype and 
+    # combinations and keeping track of the genotype and
     # pairwise genotype (ie genotypes of the 2 sites) frequencies
     for( my $i = 0; $i < $site_count - 1; $i++ ) {
 	my $site1 = $marker_names[$i];
 
-	for( my $j = $i+1; $j < $site_count ; $j++) { 	 
+	for( my $j = $i+1; $j < $site_count ; $j++) {
 	    my (%genotypes, %total_genotype_count,$total_pairwisegeno_count,
 		%pairwise_genotypes);
-	 
+
 	    my $site2 = $marker_names[$j];
 	    my (%allele_count,%allele_freqs) = (0,0);
 	    foreach my $ind ( @inds ) {
@@ -1199,7 +1200,7 @@ sub composite_LD {
 		my ($genotype2) = $ind->get_Genotypes(-marker => $site2);
 		my @alleles2  = sort $genotype2->get_Alleles;
 		my $genostr2  = join(',', @alleles2);
-		
+
 		next unless( scalar @alleles2 == 2);
 		for (@alleles1) {
 		    $allele_count{$site1}++;
@@ -1218,7 +1219,7 @@ sub composite_LD {
 		# We are using the $site1,$site2 to signify
 		# a unique key
 		$pairwise_genotypes{"$genostr1,$genostr2"}++;
-		# some individuals 
+		# some individuals
 		$total_pairwisegeno_count++;
 	    }
 	    for my $site ( %allele_freqs ) {
@@ -1227,7 +1228,7 @@ sub composite_LD {
 		}
 	    }
 	    my $n = $total_pairwisegeno_count;	# number of pairs of comparisons
-	    # 'A' and 'B' are two loci or in our case site1 and site2  
+	    # 'A' and 'B' are two loci or in our case site1 and site2
 	    my $allele1_site1 = $lookup{$site1}->{'1'};	# this is the BigA allele
 	    my $allele1_site2 = $lookup{$site2}->{'1'};	# this is the BigB allele
 	    my $allele2_site1 = $lookup{$site1}->{'2'};	# this is the LittleA allele
@@ -1248,13 +1249,13 @@ sub composite_LD {
 	    my $N5genostr = join(",",( $allele1_site1, $allele2_site1,
 				       $allele1_site2, $allele2_site2));
 	    $self->debug(" [$site1,$site2](AaBb) N5genostr=$N5genostr\n");
-	    # count of AABB in 
+	    # count of AABB in
 	    my $n1 = $pairwise_genotypes{$N1genostr} || 0;
-	    # count of AABb in 
+	    # count of AABb in
 	    my $n2 = $pairwise_genotypes{$N2genostr} || 0;
-	    # count of AaBB in 
+	    # count of AaBB in
 	    my $n4 = $pairwise_genotypes{$N4genostr} || 0;
-	    # count of AaBb in 
+	    # count of AaBb in
 	    my $n5 = $pairwise_genotypes{$N5genostr} || 0;
 
 	    my $homozA_site1 = join(",", ($allele1_site1,$allele1_site1));
@@ -1281,9 +1282,9 @@ sub composite_LD {
 	    $self->debug("delta_AB=$delta_AB -- n=$n, n_AB=$n_AB p_A=$p_A, p_B=$p_B\n");
 	    $self->debug(sprintf(" (%d * %.4f) / ( %.2f + %.2f) * ( %.2f + %.2f) \n",
 				 $n,$delta_AB**2, $pi_A, $D_A, $pi_B, $D_B));
-	    
+
 	    my $chisquared;
-	    eval { $chisquared = ( $n * ($delta_AB**2) ) / 
+	    eval { $chisquared = ( $n * ($delta_AB**2) ) /
 		       ( ( $pi_A + $D_A) * ( $pi_B + $D_B) );
 	       };
 	    if( $@ ) {
@@ -1302,26 +1303,26 @@ sub composite_LD {
  Title   : mcdonald_kreitman
  Usage   : $Fstat = mcdonald_kreitman($ingroup, $outgroup);
  Function: Calculates McDonald-Kreitman statistic based on a set of ingroup
-           individuals and an outgroup by computing the number of 
+           individuals and an outgroup by computing the number of
            differences at synonymous and non-synonymous sites
-           for intraspecific comparisons and with the outgroup 
- Returns : 2x2 table, followed by a hash reference indicating any 
-           warning messages about the status of the alleles or codons 
+           for intraspecific comparisons and with the outgroup
+ Returns : 2x2 table, followed by a hash reference indicating any
+           warning messages about the status of the alleles or codons
 	   $status is an hash reference of error messages;
 	   my ($polyN, $fixedN, $polyS, $fixedS, $status) = Bio::PopGen::Statsitics->mcdonald_kreitman($ingrp,$outgrp);
- Args    : -ingroup    => L<Bio::PopGen::Population> object or 
-                          arrayref of L<Bio::PopGen::Individual>s 
-           -outgroup   => L<Bio::PopGen::Population> object or 
+ Args    : -ingroup    => L<Bio::PopGen::Population> object or
+                          arrayref of L<Bio::PopGen::Individual>s
+           -outgroup   => L<Bio::PopGen::Population> object or
                           arrayef of L<Bio::PopGen::Individual>s
-           -polarized  => Boolean, to indicate if this should be 
-                          a polarized test. Must provide two individuals 
+           -polarized  => Boolean, to indicate if this should be
+                          a polarized test. Must provide two individuals
                           as outgroups.
 
 =cut
 
 sub mcdonald_kreitman {
     my ($self,@args) = @_;
-    my ($ingroup, $outgroup,$polarized) = 
+    my ($ingroup, $outgroup,$polarized) =
 	$self->_rearrange([qw(INGROUP OUTGROUP POLARIZED)],@args);
     my $verbose = $self->verbose;
     my $outgroup_count;
@@ -1333,7 +1334,7 @@ sub mcdonald_kreitman {
     } else {
 	$self->throw("Expected an ArrayRef of Individuals OR a Bio::PopGen::PopulationI");
     }
-	
+
     if( $polarized ) {
 	if( $outgroup_count < 2 ) {
 	    $self->throw("Need 2 outgroups with polarized option\n");
@@ -1343,9 +1344,9 @@ sub mcdonald_kreitman {
     } elsif( $outgroup_count == 0 ) {
 	$self->throw("No outgroup sequence provided");
     }
-    
+
     my $codon_path = Bio::MolEvol::CodonModel->codon_path;
-    
+
     my (%marker_names,%unique,@inds);
     for my $p ( $ingroup, $outgroup)  {
 	if( ref($p) =~ /ARRAY/i ) {
@@ -1365,9 +1366,9 @@ sub mcdonald_kreitman {
 
     my @marker_names = keys %marker_names;
     if( $marker_names[0] =~ /^(Site|Codon)/ ) {
-	# sort by site or codon number and do it in 
+	# sort by site or codon number and do it in
 	# a schwartzian transformation baby!
-	@marker_names = map { $_->[1] } 
+	@marker_names = map { $_->[1] }
 	sort { $a->[0] <=> $b->[0] }
 	map { [$_ =~ /^(?:Codon|Site)-(\d+)/, $_] } @marker_names;
     }
@@ -1375,7 +1376,7 @@ sub mcdonald_kreitman {
 
     my $num_inds = scalar @inds;
     my %vals = ( 'ingroup'  => $ingroup,
-		 'outgroup' => $outgroup,		 
+		 'outgroup' => $outgroup,
 		 );
 
     # Make the Codon Table type a parameter!
@@ -1415,14 +1416,14 @@ sub mcdonald_kreitman {
 	}
 	my $total = sum ( values %{$codonvals{'ingroup'}} );
 	next if( $total && $total < 2 ); # skip sites with < alleles
-	# process all the seen alleles (codons) 
+	# process all the seen alleles (codons)
 	# this is a vertical slide through the alignment
 	if( keys %{$codonvals{all}} <= 1 ) {
 	    # no changes or no VALID codons - monomorphic
-	} else { 
+	} else {
 	    # grab only the first outgroup codon (what to do with rest?)
 	    my ($outcodon) = keys %{$codonvals{'outgroup1'}};
-            if( ! $outcodon ) { 
+            if( ! $outcodon ) {
 		$status{"no outgroup codon $codon"}++;
 		next;
 	    }
@@ -1430,7 +1431,7 @@ sub mcdonald_kreitman {
 	    my ($outcodon2) = keys %{$codonvals{'outgroup2'}};
 	    if( ($polarized && ($outcodon ne $outcodon2)) ||
 		$out_AA eq 'X' || $out_AA eq '*' ) {
-		# skip if outgroup codons are different 
+		# skip if outgroup codons are different
 		# (when polarized option is on)
 		# or skip if the outcodon is STOP or 'NNN'
 		if( $verbose > 0 ) {
@@ -1446,7 +1447,7 @@ sub mcdonald_kreitman {
 	    # in the outgroup so it must be a shared allele (codon)
 
 	    # so we just count how many total alleles were seen
-	    # if this is the same as the number of alleles seen for just 
+	    # if this is the same as the number of alleles seen for just
 	    # the ingroup then the outgroup presents no new information
 
 	    my @ingroup_codons = keys %{$codonvals{'ingroup'}};
@@ -1464,7 +1465,7 @@ sub mcdonald_kreitman {
 	    # are all the ingroup alleles the same and diferent from outgroup?
 	    # fixed differences between species
 	    if( $diff_from_out ) {
-		if( scalar @ingroup_codons == 1 ) { 
+		if( scalar @ingroup_codons == 1 ) {
 		    # fixed differences
 		    if( $outcodon =~ /^$gapchar/ ) {
 			$status{'outgroup codons with gaps'}++;
@@ -1481,10 +1482,10 @@ sub mcdonald_kreitman {
 			$self->debug("path is ",join(",",@$path),"\n");
 			$self->debug
 			    (sprintf("%-15s fixeddiff - %s;%s(%s) %d,%d\tNfix=%d Sfix=%d Npoly=%d Spoly=%s\n",$codon,$ingroup_codons[0], $outcodon,$out_AA,
-				     @$path, map { $two_by_two{$_} } 
+				     @$path, map { $two_by_two{$_} }
 				     qw(fixed_N fixed_S poly_N poly_S)));
 		    }
-		} else { 
+		} else {
 		    # polymorphic and all are different from outgroup
 		    # Here we find the minimum number of NS subst
 		    my ($Ndiff,$Sdiff) = (3,0);	# most different path
@@ -1500,9 +1501,9 @@ sub mcdonald_kreitman {
 		    }
 		    $two_by_two{fixed_N} += $Ndiff;
 		    $two_by_two{fixed_S} += $Sdiff;
-	            if( @ingroup_codons > 2 ) { 
+	            if( @ingroup_codons > 2 ) {
 			$status{"more than 2 ingroup codons $codon"}++;
-			warn("more than 2 ingroup codons (@ingroup_codons)\n");	
+			warn("more than 2 ingroup codons (@ingroup_codons)\n");
 		    } else {
 		    	my $path = $codon_path->{uc join('',@ingroup_codons)};
 
@@ -1511,8 +1512,8 @@ sub mcdonald_kreitman {
 		    	if( $verbose > 0 ) {
 			    $self->debug(sprintf("%-15s polysite_all - %s;%s(%s) %d,%d\tNfix=%d Sfix=%d Npoly=%d Spoly=%s\n",$codon,join(',',@ingroup_codons), $outcodon,$out_AA,@$path, map { $two_by_two{$_} } qw(fixed_N fixed_S poly_N poly_S)));
 			}
-		    } 
-		} 
+		    }
+		}
 	    } else {
 		my %unq = map { $_ => 1 } @ingroup_codons;
 		delete $unq{$outcodon};
@@ -1547,18 +1548,18 @@ sub mcdonald_kreitman {
 		$two_by_two{poly_S} += $Sdiff;
 		if( $verbose > 0 ) {
 		    $self->debug(sprintf("%-15s polysite - %s;%s(%s) %d,%d\tNfix=%d Sfix=%d Npoly=%d Spoly=%s\n",$codon,join(',',@ingroup_codons), $outcodon,$out_AA,
-					 $Ndiff, $Sdiff, map { $two_by_two{$_} } 
+					 $Ndiff, $Sdiff, map { $two_by_two{$_} }
 					 qw(fixed_N fixed_S poly_N poly_S)));
 		}
 	    }
-	}	    
+	}
     }
     return ( $two_by_two{'poly_N'},
 	     $two_by_two{'fixed_N'},
 	     $two_by_two{'poly_S'},
 	     $two_by_two{'fixed_S'},
 	     {%status});
-    
+
 }
 
 *MK = \&mcdonald_kreitman;
@@ -1576,7 +1577,7 @@ sub mcdonald_kreitman {
 							  );
  Function:
  Returns : decimal number
- Args    : 
+ Args    :
 
 =cut
 
@@ -1584,7 +1585,7 @@ sub mcdonald_kreitman {
 sub mcdonald_kreitman_counts {
     my ($self,$Npoly,$Nfix,$Spoly,$Sfix) = @_;
     if( $has_twotailed ) {
-	return &Text::NSP::Measures::2D::Fisher2::twotailed::calculateStatistic 
+	return &Text::NSP::Measures::2D::Fisher2::twotailed::calculateStatistic
 	    (n11=>$Npoly,
 	     n1p=>$Npoly+$Spoly,
 	     np1=>$Npoly+$Nfix,

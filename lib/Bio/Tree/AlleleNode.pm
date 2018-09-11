@@ -1,7 +1,7 @@
 #
 # BioPerl module for Bio::Tree::AlleleNode
 #
-# Please direct questions and support issues to <bioperl-l@bioperl.org> 
+# Please direct questions and support issues to <bioperl-l@bioperl.org>
 #
 # Cared for by Jason Stajich <jason@bioperl.org>
 #
@@ -43,15 +43,15 @@ the Bioperl mailing list.  Your participation is much appreciated.
   bioperl-l@bioperl.org                  - General discussion
   http://bioperl.org/wiki/Mailing_lists  - About the mailing lists
 
-=head2 Support 
+=head2 Support
 
 Please direct usage questions or support issues to the mailing list:
 
 I<bioperl-l@bioperl.org>
 
-rather than to the module maintainer directly. Many experienced and 
-reponsive experts will be able look at the problem and quickly 
-address it. Please include a thorough description of the problem 
+rather than to the module maintainer directly. Many experienced and
+reponsive experts will be able look at the problem and quickly
+address it. Please include a thorough description of the problem
 with code and data examples if at all possible.
 
 =head2 Reporting Bugs
@@ -83,6 +83,7 @@ L<Bio::PopGen::Simulation::Coalescent> simulations.
 
 
 package Bio::Tree::AlleleNode;
+
 use vars qw($UIDCOUNTER);
 use strict;
 BEGIN { $UIDCOUNTER = 1 }
@@ -96,7 +97,7 @@ use base qw(Bio::Tree::Node Bio::PopGen::IndividualI);
 
  Title   : new
  Usage   : my $obj = Bio::Tree::AlleleNode->new();
- Function: Builds a new Bio::Tree::AlleleNode() object 
+ Function: Builds a new Bio::Tree::AlleleNode() object
  Returns : an instance of Bio::Tree::AlleleNode
  Args    : -unique_id     => $id,
            -genotypes     => \@genotypes
@@ -106,11 +107,11 @@ use base qw(Bio::Tree::Node Bio::PopGen::IndividualI);
            -bootstrap     => value   bootstrap value (string)
            -description   => description of node
            -id            => human readable (unique) id for node
-                             Should NOT contain the characters 
+                             Should NOT contain the characters
                              '();:'
 =cut
 
-sub new { 
+sub new {
     my($class,@args) = @_;
 
     my $self = $class->SUPER::new(@args);
@@ -179,9 +180,9 @@ sub num_of_results {
  Title   : add_Genotype
  Usage   : $individual->add_Genotype
  Function: add a genotype value, only a single genotype
-           may be associated 
+           may be associated
  Returns : count of the number of genotypes associated with this individual
- Args    : @genotypes - Bio::PopGen::GenotypeI object(s) containing 
+ Args    : @genotypes - Bio::PopGen::GenotypeI object(s) containing
                         alleles plus a marker name
 
 =cut
@@ -213,7 +214,7 @@ sub reset_Genotypes{
  Usage   : $individual->remove_Genotype(@names)
  Function: Removes the genotypes for the requested markers
  Returns : none
- Args    : Names of markers 
+ Args    : Names of markers
 
 
 =cut
@@ -229,7 +230,7 @@ sub remove_Genotype{
  Usage   : my @genotypes = $ind->get_Genotypes(-marker => $markername);
  Function: Get the genotypes for an individual, based on a criteria
  Returns : Array of genotypes
- Args    : either none (return all genotypes) or 
+ Args    : either none (return all genotypes) or
            -marker => name of marker to return (exact match, case matters)
 
 
@@ -244,7 +245,7 @@ sub get_Genotypes{
 
  Title   : has_Marker
  Usage   : if( $ind->has_Marker($name) ) {}
- Function: Boolean test to see if an Individual has a genotype 
+ Function: Boolean test to see if an Individual has a genotype
            for a specific marker
  Returns : Boolean (true or false)
  Args    : String representing a marker name
@@ -286,8 +287,8 @@ Methods inherited from L<Bio::Tree::Node>.
  Returns : number of current descendents for this node
  Args    : Bio::Node::NodeI
            boolean flag, true if you want to ignore the fact that you are
-           adding a second node with the same unique id (typically memory 
-           location reference in this implementation).  default is false and 
+           adding a second node with the same unique id (typically memory
+           location reference in this implementation).  default is false and
            will throw an error if you try and overwrite an existing node.
 
 
@@ -336,7 +337,7 @@ Methods inherited from L<Bio::Tree::Node>.
 
 =cut
 
-# implemented in the interface 
+# implemented in the interface
 
 =head2 ancestor
 
@@ -378,7 +379,7 @@ Methods inherited from L<Bio::Tree::Node>.
 
  Title   : id
  Usage   : $obj->id($newval)
- Function: The human readable identifier for the node 
+ Function: The human readable identifier for the node
  Returns : value of human readable id
  Args    : newvalue (optional)
  Note    : id cannot contain the characters '();:'
@@ -399,7 +400,7 @@ from L<http://evolution.genetics.washington.edu/phylip/newicktree.html>
  Usage   : my $internalid = $node->internal_id
  Function: Returns the internal unique id for this Node
            (a monotonically increasing number for this in-memory implementation
-            but could be a database determined unique id in other 
+            but could be a database determined unique id in other
 	    implementations)
  Returns : unique id
  Args    : none
@@ -453,7 +454,7 @@ interface.
 
  Title   : add_tag_value
  Usage   : $node->add_tag_value($tag,$value)
- Function: Adds a tag value to a node 
+ Function: Adds a tag value to a node
  Returns : number of values stored for this tag
  Args    : $tag   - tag name
            $value - value to store for the tag
@@ -473,7 +474,7 @@ interface.
 
  Title   : remove_all_tags
  Usage   : $node->remove_all_tags()
- Function: Removes all tags 
+ Function: Removes all tags
  Returns : None
  Args    : None
 
