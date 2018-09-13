@@ -30,10 +30,10 @@ Bio::PopGen::Utilities - Utilities for working with PopGen data and objects
   # site
   my $pop = Bio::PopGen::Utilities->aln_to_population(-alignment => $aln);
 
-  # get the synonymous sites from the alignemt only as the 'genotypes'
-  # for the population
-  my $synpop = Bio::PopGen::Utilities->aln_to_population(-site_model => 'cod',
-                                                         -alignment  => $aln);
+  # Treat the sequence as coding and return genotypes as multiples of 3 sites 
+  # from the alignemt as the 'genotypes' for the population
+  my $codons_pop = Bio::PopGen::Utilities->aln_to_population(-site_model => 'cod',
+                                                             -alignment  => $aln);
 
 
 =head1 DESCRIPTION
