@@ -21,6 +21,10 @@ Summary of important user-visible changes for Bio-PopGen
     returns a Bio::PopGen::Population (the class name was misspelled).
   * Bio::PopGen::IO->_guess_format recognizes .dat (not only .datX),
     .prettybase, .phase and .hap/.hapmap.
+  * Bio::PopGen::Genotype->get_Alleles compiled the $BlankAlleles pattern
+    with /o, so the first value seen was used for the whole process. The
+    hapmap and phase parsers no longer clear $BlankAlleles globally, so N
+    and ? are treated as missing data in those formats as in the others.
 
 1.7.3     2018-09-11 13:37:12-05:00 America/Chicago
   * First release after split from bioperl-live.

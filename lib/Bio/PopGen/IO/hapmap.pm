@@ -115,7 +115,6 @@ sub _initialize  {
 
     my($self, @args) = @_;
 
-    $Bio::PopGen::Genotype::BlankAlleles='';
 
     my ($fieldsep,$all_sep,
 	$noheader, $start_col) = $self->_rearrange([qw(FIELD_DELIMITER

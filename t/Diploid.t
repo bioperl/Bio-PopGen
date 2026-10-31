@@ -10,7 +10,7 @@ BEGIN {
     use lib '.';
     use Bio::Root::Test;
 
-    test_begin(-tests => 44);
+    test_begin(-tests => 46);
 
     use_ok('Bio::PopGen::Individual');
     use_ok('Bio::PopGen::Genotype');
@@ -134,3 +134,12 @@ is(Bio::PopGen::IO->_guess_format('x.dat'), 'csv', 'guess .dat');
 is(Bio::PopGen::IO->_guess_format('x.prettybase'), 'prettybase', 'guess .prettybase');
 is(Bio::PopGen::IO->_guess_format('x.phase'), 'phase', 'guess .phase');
 is(Bio::PopGen::IO->_guess_format('x.hapmap'), 'hapmap', 'guess .hapmap');
+
+# $BlankAlleles changes take effect after the first get_Alleles call
+{
+    my $g = Bio::PopGen::Genotype->new(-marker_name => 'M', -alleles => ['A','N']);
+    is(scalar($g->get_Alleles), 1, 'N is blank with the default pattern');
+    local $Bio::PopGen::Genotype::BlankAlleles = '[\?]';
+    my $g2 = Bio::PopGen::Genotype->new(-marker_name => 'M', -alleles => ['A','N']);
+    is(scalar($g2->get_Alleles), 2, 'changed BlankAlleles pattern is used for later genotypes');
+}

@@ -211,7 +211,7 @@ sub get_Alleles{
 	    return @{$self->{'_cached_noblank'}}
 	}
 	# one liners - woo hoo.
-	$self->{'_cached_noblank'} = [ grep { ! /^\s*$BlankAlleles\s*$/o }
+	$self->{'_cached_noblank'} = [ grep { ! /^\s*$BlankAlleles\s*$/ }
 				       @{$self->{'_alleles'} || []}];
 	return @{$self->{'_cached_noblank'}};
     }
