@@ -2,6 +2,25 @@ Summary of important user-visible changes for Bio-PopGen
 --------------------------------------------------------
 
 {{$NEXT}}
+  * Bio::PopGen::Population->haploid_population now returns new haploid
+    individuals (one per chromosome, named <id>.1, <id>.2, ...). It used to
+    return the original diploid individuals twice. Individuals with no
+    genotype at a marker no longer make it die.
+  * Bio::PopGen::Statistics: for Bio::PopGen::PopulationI input, the Fu and
+    Li D, D*, F, F* and Tajima D wrappers now use the number of chromosomes
+    as the sample size, as theta and segregating_sites_count already did.
+    Values for diploid populations change; haploid data is unaffected.
+  * Bio::PopGen::Statistics: mcdonald_kreitman accepts PopulationI objects
+    (it died with "Not an ARRAY reference"); composite_LD accepts an array
+    reference of individuals (it dropped them); the $codon_table package
+    variable is assigned instead of being left undefined.
+  * Bio::PopGen::Population->add_Individual no longer stores undef or
+    non-IndividualI values it warned about.
+  * Bio::PopGen::Simulation::Coalescent: -maxcount is honored by next_tree.
+  * Bio::PopGen::Simulation::GeneticDrift: next_generation('population')
+    returns a Bio::PopGen::Population (the class name was misspelled).
+  * Bio::PopGen::IO->_guess_format recognizes .dat (not only .datX),
+    .prettybase, .phase and .hap/.hapmap.
 
 1.7.3     2018-09-11 13:37:12-05:00 America/Chicago
   * First release after split from bioperl-live.

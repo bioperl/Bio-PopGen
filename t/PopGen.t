@@ -423,11 +423,10 @@ is(sprintf("%.3f",$stats->pi($population)),12.266);
 # is(sprintf("%.3f",$stats->pi($population)),12.266);
 
 is(sprintf("%.3f",$stats->theta($population)),5.548);
-#TODO: {
-#    local $TODO = 'May be TJd inconsistency, need to recalculate';
-    is(sprintf("%.3f",$stats->tajima_D($population)),'2.926');
-    is(sprintf("%.3f",$stats->tajima_D($population->haploid_population)),3.468);
-#}
+# diploid data: n is the number of chromosomes (180), so the diploid
+# population and its haploid expansion give the same value
+is(sprintf("%.3f",$stats->tajima_D($population)),'3.486');
+is(sprintf("%.3f",$stats->tajima_D($population->haploid_population)),'3.486');
 
 # test converting from hapmap to phase
 my $string;

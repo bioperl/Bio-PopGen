@@ -180,9 +180,10 @@ use constant {
 
 use Bio::MolEvol::CodonModel;
 use List::Util qw(sum);
+use Bio::PopGen::Population;
 
 use base qw(Bio::Root::Root);
-our $codon_table => default_codon_table;
+our $codon_table = default_codon_table;
 our $has_twotailed => 0;
 BEGIN {
     eval { require Text::NSP::Measures::2D::Fisher2::twotailed };
@@ -224,6 +225,14 @@ BEGIN {
 
 =cut
 
+# number of sampled sequences in a population: one per chromosome, so a
+# diploid individual counts twice. This is the same count that theta and
+# segregating_sites_count use.
+sub _sample_size {
+    my ($self,$pop) = @_;
+    return $pop->haploid_population->get_number_individuals;
+}
+
 sub fu_and_li_D {
     my ($self,$ingroup,$outgroup) = @_;
 
@@ -234,7 +243,7 @@ sub fu_and_li_D {
 	$seg_sites   = $self->segregating_sites_count($ingroup);
     } elsif( ref($ingroup) &&
 	     $ingroup->isa('Bio::PopGen::PopulationI')) {
-	$n = $ingroup->get_number_individuals;
+	$n = $self->_sample_size($ingroup);
 	$seg_sites   = $self->segregating_sites_count($ingroup);
     } else {
 	$self->throw("expected an array reference of a list of Bio::PopGen::IndividualI OR a Bio::PopGen::PopulationI object to fu_and_li_D");
@@ -332,7 +341,7 @@ sub fu_and_li_D_star {
     } elsif( ref($individuals) &&
 	     $individuals->isa('Bio::PopGen::PopulationI')) {
 	my $pop = $individuals;
-	$n = $pop->get_number_individuals;
+	$n = $self->_sample_size($pop);
 	$seg_sites   = $self->segregating_sites_count($pop);
 	$singletons  = $self->singleton_count($pop);
     } else {
@@ -421,7 +430,7 @@ sub fu_and_li_F {
 	$seg_sites   = $self->segregating_sites_count($ingroup);
     } elsif( ref($ingroup) &&
 	     $ingroup->isa('Bio::PopGen::PopulationI')) {
-	$n = $ingroup->get_number_individuals;
+	$n = $self->_sample_size($ingroup);
 	$pi          = $self->pi($ingroup);
 	$seg_sites   = $self->segregating_sites_count($ingroup);
     } else {
@@ -518,7 +527,7 @@ sub fu_and_li_F_star {
     } elsif( ref($individuals) &&
 	     $individuals->isa('Bio::PopGen::PopulationI')) {
 	my $pop = $individuals;
-	$n = $pop->get_number_individuals;
+	$n = $self->_sample_size($pop);
 	$pi          = $self->pi($pop);
 	$seg_sites   = $self->segregating_sites_count($pop);
 	$singletons  = $self->singleton_count($pop);
@@ -615,7 +624,7 @@ sub tajima_D {
     } elsif( ref($individuals) &&
 	     $individuals->isa('Bio::PopGen::PopulationI')) {
 	my $pop = $individuals;
-	$n = $pop->get_number_individuals;
+	$n = $self->_sample_size($pop);
 	$pi          = $self->pi($pop);
 	$seg_sites = $self->segregating_sites_count($pop);
     } else {
@@ -721,7 +730,7 @@ sub pi {
     } elsif( ref($individuals) &&
 	     $individuals->isa('Bio::PopGen::PopulationI') ) {
 	my $pop = $individuals;
-	$n = $pop->get_number_individuals;
+	$n = $self->_sample_size($pop);
 	foreach my $marker( $pop->get_Markers ) {
 	    push @marker_names, $marker->name;
 	    #$data{$marker->name} = {$marker->get_Allele_Frequencies};
@@ -801,7 +810,7 @@ sub theta {
 	# This will handle the case when we pass in a PopulationI object
 	my $pop = $n;
 	$totalsites = $seg_sites; # shift the arguments over by one
-	$n = $pop->haploid_population->get_number_individuals;
+	$n = $self->_sample_size($pop);
 	$seg_sites = $self->segregating_sites_count($pop);
     }
     my $a1 = 0;
@@ -1106,7 +1115,7 @@ sub composite_LD {
     my ($self,$pop) = @_;
     if( ref($pop) =~ /ARRAY/i ) {
 	if( ref($pop->[0]) && $pop->[0]->isa('Bio::PopGen::IndividualI') ) {
-	    $pop = Bio::PopGen::Population->new(-individuals => @$pop);
+	    $pop = Bio::PopGen::Population->new(-individuals => $pop);
 	} else {
 	    $self->warn("composite_LD expects a Bio::PopGen::PopulationI or an arrayref of Bio::PopGen::IndividualI objects");
 	    return ();
@@ -1348,12 +1357,12 @@ sub mcdonald_kreitman {
     my $codon_path = Bio::MolEvol::CodonModel->codon_path;
 
     my (%marker_names,%unique,@inds);
+    # normalize both groups to array references of individuals
     for my $p ( $ingroup, $outgroup)  {
-	if( ref($p) =~ /ARRAY/i ) {
-	    push @inds, @$p;
-	} else {
-	    push @inds, $p->get_Individuals;
+	if( ref($p) !~ /ARRAY/i ) {
+	    $p = [ $p->get_Individuals ];
 	}
+	push @inds, @$p;
     }
     for my $i ( @inds ) {
 	if( $unique{$i->unique_id}++ ) {

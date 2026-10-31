@@ -280,15 +280,17 @@ sub set_Allele_Frequency {
 
 sub add_Individual{
     my ($self,@inds) = @_;
+    my @valid;
     foreach my $i ( @inds ) {
 	next if ! defined $i;
 
-	unless( $self->{'_checkisa'} ? $i->isa('Bio::PopGen::IndividualI') : 1  ) {
+	unless( $self->{'_checkisa'} ? (ref($i) && $i->isa('Bio::PopGen::IndividualI')) : 1  ) {
 	    $self->warn("cannot add an individual ($i) which is not a Bio::PopGen::IndividualI");
 	    next;
 	}
+	push @valid, $i;
     }
-    push @{$self->{'_individuals'}}, @inds;
+    push @{$self->{'_individuals'}}, @valid;
     $self->{'_cached_markernames'} = undef;
     $self->{'_allele_freqs'} = {};
     return scalar @{$self->{'_individuals'} || []};
@@ -594,26 +596,27 @@ sub haploid_population{
        # separate genotypes into 'chromosomes'
        for my $marker_name( @marker_names ) {
 	   my ($genotype) = $ind->get_Genotypes(-marker => $marker_name);
+	   next unless defined $genotype; # individual has no data at this marker
 	   my $i =0;
 	   for my $allele ( $genotype->get_Alleles ) {
+	       $i++;
 	       push @{$chromosomes[$i]},
 	       Bio::PopGen::Genotype->new(-marker_name => $marker_name,
 					-individual_id => $id.".$i",
 					-alleles     => [$allele]);
-	       $i++;
 	   }
        }
-       for my $chrom ( @chromosomes ) {
-	   my $copyind = ref($ind)->new(-unique_id => $id.".1",
-					-genotypes => $chrom);
-	   push @inds, $ind;
+       # one new haploid individual per chromosome, named <id>.1, <id>.2, ...
+       for my $i ( 1..$#chromosomes ) {
+	   push @inds, ref($ind)->new(-unique_id => $id.".$i",
+				       -genotypes => $chromosomes[$i]);
        }
    }
    my $population = ref($self)->new(-name        => $self->name,
 				    -source      => $self->source,
 				    -description => $self->description,
 				    -individuals => \@inds);
-
+   return $population;
 }
 
 1;
