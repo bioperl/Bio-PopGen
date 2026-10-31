@@ -1,0 +1,16 @@
+[workspace]
+name = "bio-popgen-validation"
+description = "Independent reference values for Bio::PopGen statistics, computed with R PopGenome"
+channels = ["conda-forge", "bioconda"]
+platforms = ["linux-64"]
+
+[dependencies]
+r-base = ">=4.3"
+r-popgenome = "*"
+r-ape = "*"
+r-pegas = "*"
+
+[tasks]
+reference = "Rscript popgenome_reference.R"
+compare = "perl compare.pl"
+all = { depends-on = ["reference", "compare"] }

@@ -1,0 +1,5 @@
+.pixi/
+data/
+bioperl_values.tsv
+popgenome_values.tsv
+pixi_install.log
