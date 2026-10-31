@@ -2,6 +2,37 @@ Summary of important user-visible changes for Bio-PopGen
 --------------------------------------------------------
 
 {{$NEXT}}
+  * Bio::PopGen::Population->haploid_population now returns new haploid
+    individuals (one per chromosome, named <id>.1, <id>.2, ...). It used to
+    return the original diploid individuals twice. Individuals with no
+    genotype at a marker no longer make it die.
+  * Bio::PopGen::Statistics: for Bio::PopGen::PopulationI input, the Fu and
+    Li D, D*, F, F* and Tajima D wrappers now use the number of chromosomes
+    as the sample size, as theta and segregating_sites_count already did.
+    Values for diploid populations change; haploid data is unaffected.
+  * Bio::PopGen::Statistics: mcdonald_kreitman accepts PopulationI objects
+    (it died with "Not an ARRAY reference"); composite_LD accepts an array
+    reference of individuals (it dropped them); the $codon_table package
+    variable is assigned instead of being left undefined.
+  * Bio::PopGen::Population->add_Individual no longer stores undef or
+    non-IndividualI values it warned about.
+  * Bio::PopGen::Simulation::Coalescent: -maxcount is honored by next_tree.
+  * Bio::PopGen::Simulation::GeneticDrift: next_generation('population')
+    returns a Bio::PopGen::Population (the class name was misspelled).
+  * Bio::PopGen::IO->_guess_format recognizes .dat (not only .datX),
+    .prettybase, .phase and .hap/.hapmap.
+  * Bio::PopGen::Genotype->get_Alleles compiled the $BlankAlleles pattern
+    with /o, so the first value seen was used for the whole process. The
+    hapmap and phase parsers no longer clear $BlankAlleles globally, so N
+    and ? are treated as missing data in those formats as in the others.
+  * Bio::PopGen::Statistics: the Fu and Li *_counts forms warn and return
+    undef when the variance term is zero (n=2, or n=3 for D*) instead of
+    dying with a division by zero; tajima_D_counts does the same for n=1.
+    composite_LD and mcdonald_kreitman skip an individual that has no
+    genotype at a marker instead of dying.
+  * Bio::PopGen::Individual->get_Genotypes(-marker => $m) returns an empty
+    list, not a list holding undef, when the individual has no genotype at
+    that marker. pi and derived_mutations no longer die on such input.
 
 1.7.3     2018-09-11 13:37:12-05:00 America/Chicago
   * First release after split from bioperl-live.

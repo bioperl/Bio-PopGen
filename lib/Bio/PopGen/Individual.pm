@@ -263,7 +263,9 @@ sub get_Genotypes{
 	   return();
        }
        my $v = $self->{'_genotypes'}->{$name};
-       return $v;
+       # empty list, not (undef), when the marker is absent so that
+       # callers iterating the result do not see an undef genotype
+       return defined $v ? $v : ();
    }
    return values %{$self->{'_genotypes'} || {}};
 }

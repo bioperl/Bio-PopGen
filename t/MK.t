@@ -10,10 +10,13 @@ BEGIN {
     use lib '.';
     use Bio::Root::Test;
     
-    test_begin(-tests => 46);
+    test_begin(-tests => 53);
     use_ok('Bio::AlignIO');
     use_ok('Bio::PopGen::Statistics');
     use_ok('Bio::PopGen::Utilities');
+    use_ok('Bio::PopGen::Population');
+    use_ok('Bio::PopGen::Individual');
+    use_ok('Bio::PopGen::Genotype');
     
 }
 my $verbose = test_debug();
@@ -202,3 +205,35 @@ is($counts[0], 6, 'NSpoly');
 is($counts[1], 0, 'NSfixed');
 is($counts[2], 17, 'Spoly');
 is($counts[3], 1, 'Sfixed');
+
+# ---- PopulationI input must give the same counts as arrayref input
+{
+    my $inpop  = Bio::PopGen::Population->new(-individuals => \@ingroup_seqs);
+    my $outpop = Bio::PopGen::Population->new(-individuals => \@outgroup_seqs1);
+    my @from_array = $stats->mcdonald_kreitman(-ingroup => \@ingroup_seqs, -outgroup => \@outgroup_seqs1);
+    my @from_pop   = $stats->mcdonald_kreitman(-ingroup => $inpop,         -outgroup => $outpop);
+    is_deeply([ @from_pop[0..3] ], [ @from_array[0..3] ], 'mcdonald_kreitman accepts Population objects');
+}
+
+# ---- hand-checked codon example, standard code
+#  Codon-1 in ATG,ATG (M)  out ATA (I): fixed nonsynonymous
+#  Codon-2 in AAA,AAG (K)  out AAA    : synonymous polymorphism shared with outgroup
+#  Codon-3 in GGA,GGA (G)  out GGG (G): fixed synonymous
+#  Codon-4 in TTA,TTG (L)  out CTA (L): synonymous polymorphism, plus a fixed
+#                                       synonymous difference to the outgroup
+#  => poly_N 0, fixed_N 1, poly_S 2, fixed_S 2
+{
+    my $mk = sub { my ($id,%g) = @_; my $i = Bio::PopGen::Individual->new(-unique_id => $id);
+                   $i->add_Genotype(Bio::PopGen::Genotype->new(-marker_name => $_, -alleles => [$g{$_}])) for sort keys %g; $i };
+    my @in  = ( $mk->('i1', 'Codon-1' => 'ATG', 'Codon-2' => 'AAA', 'Codon-3' => 'GGA', 'Codon-4' => 'TTA'),
+                $mk->('i2', 'Codon-1' => 'ATG', 'Codon-2' => 'AAG', 'Codon-3' => 'GGA', 'Codon-4' => 'TTG') );
+    my @out = ( $mk->('o1', 'Codon-1' => 'ATA', 'Codon-2' => 'AAA', 'Codon-3' => 'GGG', 'Codon-4' => 'CTA') );
+    my @c = $stats->mcdonald_kreitman(-ingroup => \@in, -outgroup => \@out);
+    is_deeply([ @c[0..3] ], [0, 1, 2, 2], 'hand-checked MK counts (poly_N fixed_N poly_S fixed_S)');
+
+    # an ingroup individual with no genotype at a codon is skipped, not fatal
+    my $i3 = $mk->('i3', 'Codon-1' => 'ATG', 'Codon-2' => 'AAA', 'Codon-3' => 'GGA');
+    my @c2 = eval { $stats->mcdonald_kreitman(-ingroup => [@in, $i3], -outgroup => \@out) };
+    is($@, '', 'missing codon in an individual does not die');
+    is_deeply([ @c2[0..3] ], [0, 1, 2, 2], 'counts unchanged when the extra individual adds no new alleles');
+}

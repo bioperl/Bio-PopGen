@@ -192,7 +192,9 @@ sub next_generation{
 
    if( defined $rettype &&
        $rettype =~ /population/i) {
-       return Bio::PopGen::Poulation->new(-frequencies => \%f);
+	my $pop = Bio::PopGen::Population->new();
+	$pop->set_Allele_Frequency(-frequencies => { 'Marker1' => \%f });
+	return $pop;
    } else {
        return %f;
    }

@@ -180,9 +180,10 @@ use constant {
 
 use Bio::MolEvol::CodonModel;
 use List::Util qw(sum);
+use Bio::PopGen::Population;
 
 use base qw(Bio::Root::Root);
-our $codon_table => default_codon_table;
+our $codon_table = default_codon_table;
 our $has_twotailed => 0;
 BEGIN {
     eval { require Text::NSP::Measures::2D::Fisher2::twotailed };
@@ -224,6 +225,14 @@ BEGIN {
 
 =cut
 
+# number of sampled sequences in a population: one per chromosome, so a
+# diploid individual counts twice. This is the same count that theta and
+# segregating_sites_count use.
+sub _sample_size {
+    my ($self,$pop) = @_;
+    return $pop->haploid_population->get_number_individuals;
+}
+
 sub fu_and_li_D {
     my ($self,$ingroup,$outgroup) = @_;
 
@@ -234,7 +243,7 @@ sub fu_and_li_D {
 	$seg_sites   = $self->segregating_sites_count($ingroup);
     } elsif( ref($ingroup) &&
 	     $ingroup->isa('Bio::PopGen::PopulationI')) {
-	$n = $ingroup->get_number_individuals;
+	$n = $self->_sample_size($ingroup);
 	$seg_sites   = $self->segregating_sites_count($ingroup);
     } else {
 	$self->throw("expected an array reference of a list of Bio::PopGen::IndividualI OR a Bio::PopGen::PopulationI object to fu_and_li_D");
@@ -299,8 +308,12 @@ sub fu_and_li_D_counts {
 
     my $u = $a_n - 1 - $v;
 
-    ($seg_sites - $a_n * $external_mut) /
-	sqrt( ($u * $seg_sites) + ($v * $seg_sites*$seg_sites));
+    my $denom = sqrt( ($u * $seg_sites) + ($v * $seg_sites*$seg_sites));
+    if( $denom == 0 ) {
+	$self->warn("Fu and Li D is undefined for n=$n, S=$seg_sites (zero variance)\n");
+	return;
+    }
+    return ($seg_sites - $a_n * $external_mut) / $denom;
 
 }
 
@@ -332,7 +345,7 @@ sub fu_and_li_D_star {
     } elsif( ref($individuals) &&
 	     $individuals->isa('Bio::PopGen::PopulationI')) {
 	my $pop = $individuals;
-	$n = $pop->get_number_individuals;
+	$n = $self->_sample_size($pop);
 	$seg_sites   = $self->segregating_sites_count($pop);
 	$singletons  = $self->singleton_count($pop);
     } else {
@@ -361,6 +374,10 @@ sub fu_and_li_D_star {
 
 sub fu_and_li_D_star_counts {
     my ($self,$n,$seg_sites, $singletons) = @_;
+    if( $n <= 2 ) {
+	$self->warn("n is $n, too small, must be > 2\n");
+	return;
+    }
     my $a_n;
     for(my $k = 1; $k < $n; $k++ ) {
 	$a_n += ( 1 / $k );
@@ -390,9 +407,12 @@ sub fu_and_li_D_star_counts {
 			  ($n-1)))) - $v_star;
 
 
-    return (($n / ($n - 1)) * $seg_sites -
-	    $a_n * $singletons) /
-	    sqrt( ($u_star * $seg_sites) + ($v_star * $seg_sites*$seg_sites));
+    my $denom = sqrt( ($u_star * $seg_sites) + ($v_star * $seg_sites*$seg_sites));
+    if( $denom == 0 ) {
+	$self->warn("Fu and Li D* is undefined for n=$n, S=$seg_sites (zero variance)\n");
+	return;
+    }
+    return (($n / ($n - 1)) * $seg_sites - $a_n * $singletons) / $denom;
 }
 
 
@@ -421,7 +441,7 @@ sub fu_and_li_F {
 	$seg_sites   = $self->segregating_sites_count($ingroup);
     } elsif( ref($ingroup) &&
 	     $ingroup->isa('Bio::PopGen::PopulationI')) {
-	$n = $ingroup->get_number_individuals;
+	$n = $self->_sample_size($ingroup);
 	$pi          = $self->pi($ingroup);
 	$seg_sites   = $self->segregating_sites_count($ingroup);
     } else {
@@ -459,6 +479,10 @@ sub fu_and_li_F {
 
 sub fu_and_li_F_counts {
     my ($self,$n,$pi,$seg_sites, $external) = @_;
+    if( $n <= 2 ) {
+	$self->warn("n is $n, too small, must be > 2\n");
+	return;
+    }
     my $a_n = 0;
     for(my $k= 1; $k < $n; $k++ ) {
 	$a_n += ( 1 / $k );
@@ -484,8 +508,12 @@ sub fu_and_li_F_counts {
 		$a_n - $v_F;
 
     # warn("$v_F vf $u_F uf n = $n\n");
-    my $F = ($pi - $external) / ( sqrt( ($u_F*$seg_sites) +
-					($v_F*($seg_sites**2)) ) );
+    my $denom = sqrt( ($u_F*$seg_sites) + ($v_F*($seg_sites**2)) );
+    if( $denom == 0 ) {
+	$self->warn("Fu and Li F is undefined for n=$n, S=$seg_sites (zero variance)\n");
+	return;
+    }
+    my $F = ($pi - $external) / $denom;
 
     return $F;
 }
@@ -518,7 +546,7 @@ sub fu_and_li_F_star {
     } elsif( ref($individuals) &&
 	     $individuals->isa('Bio::PopGen::PopulationI')) {
 	my $pop = $individuals;
-	$n = $pop->get_number_individuals;
+	$n = $self->_sample_size($pop);
 	$pi          = $self->pi($pop);
 	$seg_sites   = $self->segregating_sites_count($pop);
 	$singletons  = $self->singleton_count($pop);
@@ -582,8 +610,12 @@ sub fu_and_li_F_star_counts {
 		    (3 * $n * ( $n - 1))) / $a_n) - $v_F_star;
 
     # warn("vf* = $v_F_star uf* = $u_F_star n = $n\n");
-    my $F_star = ( $pi - ($singletons*( ( $n-1) / $n)) ) /
-	sqrt ( $u_F_star*$seg_sites + $v_F_star*$seg_sites**2);
+    my $denom = sqrt( $u_F_star*$seg_sites + $v_F_star*$seg_sites**2 );
+    if( $denom == 0 ) {
+	$self->warn("Fu and Li F* is undefined for n=$n, S=$seg_sites (zero variance)\n");
+	return;
+    }
+    my $F_star = ( $pi - ($singletons*( ( $n-1) / $n)) ) / $denom;
     return $F_star;
 }
 
@@ -615,7 +647,7 @@ sub tajima_D {
     } elsif( ref($individuals) &&
 	     $individuals->isa('Bio::PopGen::PopulationI')) {
 	my $pop = $individuals;
-	$n = $pop->get_number_individuals;
+	$n = $self->_sample_size($pop);
 	$pi          = $self->pi($pop);
 	$seg_sites = $self->segregating_sites_count($pop);
     } else {
@@ -642,6 +674,10 @@ sub tajima_D {
 
 sub tajima_D_counts {
     my ($self,$n,$seg_sites,$pi) = @_;
+    if( $n <= 1 ) {
+	$self->warn("n is $n, too small, must be > 1\n");
+	return;
+    }
     my $a1 = 0;
     for(my $k= 1; $k < $n; $k++ ) {
 	$a1 += ( 1 / $k );
@@ -721,7 +757,7 @@ sub pi {
     } elsif( ref($individuals) &&
 	     $individuals->isa('Bio::PopGen::PopulationI') ) {
 	my $pop = $individuals;
-	$n = $pop->get_number_individuals;
+	$n = $self->_sample_size($pop);
 	foreach my $marker( $pop->get_Markers ) {
 	    push @marker_names, $marker->name;
 	    #$data{$marker->name} = {$marker->get_Allele_Frequencies};
@@ -801,7 +837,7 @@ sub theta {
 	# This will handle the case when we pass in a PopulationI object
 	my $pop = $n;
 	$totalsites = $seg_sites; # shift the arguments over by one
-	$n = $pop->haploid_population->get_number_individuals;
+	$n = $self->_sample_size($pop);
 	$seg_sites = $self->segregating_sites_count($pop);
     }
     my $a1 = 0;
@@ -1106,7 +1142,7 @@ sub composite_LD {
     my ($self,$pop) = @_;
     if( ref($pop) =~ /ARRAY/i ) {
 	if( ref($pop->[0]) && $pop->[0]->isa('Bio::PopGen::IndividualI') ) {
-	    $pop = Bio::PopGen::Population->new(-individuals => @$pop);
+	    $pop = Bio::PopGen::Population->new(-individuals => $pop);
 	} else {
 	    $self->warn("composite_LD expects a Bio::PopGen::PopulationI or an arrayref of Bio::PopGen::IndividualI objects");
 	    return ();
@@ -1187,6 +1223,7 @@ sub composite_LD {
 	    foreach my $ind ( @inds ) {
 		# build string of genotype at site 1
 		my ($genotype1) = $ind->get_Genotypes(-marker => $site1);
+		next unless defined $genotype1;
 		my @alleles1  = sort $genotype1->get_Alleles;
 
                 # if an individual has only one available allele
@@ -1198,6 +1235,7 @@ sub composite_LD {
 
 		# build string of genotype at site 2
 		my ($genotype2) = $ind->get_Genotypes(-marker => $site2);
+		next unless defined $genotype2;
 		my @alleles2  = sort $genotype2->get_Alleles;
 		my $genostr2  = join(',', @alleles2);
 
@@ -1348,12 +1386,12 @@ sub mcdonald_kreitman {
     my $codon_path = Bio::MolEvol::CodonModel->codon_path;
 
     my (%marker_names,%unique,@inds);
+    # normalize both groups to array references of individuals
     for my $p ( $ingroup, $outgroup)  {
-	if( ref($p) =~ /ARRAY/i ) {
-	    push @inds, @$p;
-	} else {
-	    push @inds, $p->get_Individuals;
+	if( ref($p) !~ /ARRAY/i ) {
+	    $p = [ $p->get_Individuals ];
 	}
+	push @inds, @$p;
     }
     for my $i ( @inds ) {
 	if( $unique{$i->unique_id}++ ) {
@@ -1365,7 +1403,7 @@ sub mcdonald_kreitman {
     }
 
     my @marker_names = keys %marker_names;
-    if( $marker_names[0] =~ /^(Site|Codon)/ ) {
+    if( @marker_names && $marker_names[0] =~ /^(Site|Codon)/ ) {
 	# sort by site or codon number and do it in
 	# a schwartzian transformation baby!
 	@marker_names = map { $_->[1] }
@@ -1395,7 +1433,9 @@ sub mcdonald_kreitman {
 	for my $t ( @vt ) {
 	    my $outcount = 1;
 	    for my $ind ( @{$vals{$t}} ) {
-		my @alleles = $ind->get_Genotypes($codon)->get_Alleles;
+		my ($genotype) = $ind->get_Genotypes($codon);
+		next unless defined $genotype; # no data for this codon
+		my @alleles = $genotype->get_Alleles;
 		if( @alleles > 2 ) {
 		    warn("Codon $codon saw ", scalar @alleles, " alleles for ind ", $ind->unique_id, "\n");
 		    die;

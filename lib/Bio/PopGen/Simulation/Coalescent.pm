@@ -339,10 +339,10 @@ sub maxcount{
    my ($self,$value) = @_;
    if( defined $value) {
        if( $value =~ /^(\d+)/ ) {
-	   $self->{'maxcount'} = $1;
+	   $self->{'_maxcount'} = $1;
        } else {
 	   $self->warn("Must specify a valid Positive integer to maxcount");
-	   $self->{'maxcount'} = 0;
+	   $self->{'_maxcount'} = 0;
        }
   }
    return $self->{'_maxcount'};

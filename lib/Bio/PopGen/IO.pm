@@ -314,7 +314,10 @@ END
 sub _guess_format {
    my $class = shift;
    return unless $_ = shift;
-   return 'csv'   if (/csv/i or /\.dat\w$/i);
+   return 'prettybase' if /\.prettybase$/i;
+   return 'phase'      if /\.phase$/i;
+   return 'hapmap'     if /\.hap(map)?$/i;
+   return 'csv'        if (/csv/i or /\.dat$/i);
 }
 
 sub close {
