@@ -10,7 +10,7 @@ BEGIN {
     use lib '.';
     use Bio::Root::Test;
 
-    test_begin(-tests => 46);
+    test_begin(-tests => 66);
 
     use_ok('Bio::PopGen::Individual');
     use_ok('Bio::PopGen::Genotype');
@@ -142,4 +142,52 @@ is(Bio::PopGen::IO->_guess_format('x.hapmap'), 'hapmap', 'guess .hapmap');
     local $Bio::PopGen::Genotype::BlankAlleles = '[\?]';
     my $g2 = Bio::PopGen::Genotype->new(-marker_name => 'M', -alleles => ['A','N']);
     is(scalar($g2->get_Alleles), 2, 'changed BlankAlleles pattern is used for later genotypes');
+}
+
+# ---- missing data: an individual with no genotype at a marker, and a
+# genotype with one blank allele. Alleles per site over the 5 non-blank
+# chromosomes-with-data: S1 A5 G1, S2 C3 T1 (i3 has no S2), S3 T4 A1 (i2 N).
+{
+    my @miss = (
+        mk('m1', S1 => ['A','G'], S2 => ['C','C'], S3 => ['T','T']),
+        mk('m2', S1 => ['A','A'], S2 => ['C','T'], S3 => ['T','N']),
+        mk('m3', S1 => ['A','A'],                  S3 => ['T','A']),
+    );
+    my @mout = ( mk('mo', S1 => ['A'], S2 => ['C'], S3 => ['T']) );
+    my $mpop = Bio::PopGen::Population->new(-individuals => \@miss);
+    my $opop = Bio::PopGen::Population->new(-individuals => \@mout);
+    local $SIG{__WARN__} = sub {};
+
+    my $h = $mpop->haploid_population;
+    is($h->get_number_individuals, 6, 'haploid_population with missing data');
+    is_deeply([ sort(($h->get_Individuals(-unique_id => 'm3.1'))[0]->get_marker_names) ], [qw(S1 S3)],
+              'haploid copy lacks the marker its diploid lacked');
+    is_deeply([ sort(($h->get_Individuals(-unique_id => 'm2.2'))[0]->get_marker_names) ], [qw(S1 S2)],
+              'blank allele produces no genotype on that chromosome');
+
+    is_deeply([ $stats->derived_mutations(\@miss, \@mout) ], [3, undef], 'derived_mutations(arrayref) with missing data');
+    is_deeply([ $stats->derived_mutations($mpop, $opop) ],  [3, undef], 'derived_mutations(population) agrees');
+    for my $m ( qw(segregating_sites_count singleton_count pi) ) {
+        is($stats->$m($mpop), $stats->$m(\@miss), "$m population == arrayref with missing data");
+    }
+    is($stats->segregating_sites_count($mpop), 3, 'segregating sites with missing data');
+    is($stats->singleton_count($mpop), 3, 'singletons with missing data');
+    is(sprintf("%.4f", $stats->pi($mpop)), sprintf("%.4f", (1 - (20/30)) + (1 - (6/12)) + (1 - (12/20))),
+       'pi with missing data uses per-site sample sizes');
+
+    my %ld = $stats->composite_LD($mpop);
+    ok(exists $ld{S1}{S3}, 'composite_LD skips individuals missing a site instead of dying');
+    is(scalar(keys %{$ld{S1}}), 2, 'composite_LD computed both pairs with S1');
+}
+
+# ---- small n: warn and return undef instead of dividing by zero
+{
+    local $SIG{__WARN__} = sub {};
+    ok(!defined $stats->fu_and_li_D_star_counts(2, 3, 1), 'D* n=2 undef');
+    ok(!defined $stats->fu_and_li_D_star_counts(3, 3, 1), 'D* n=3 undef (zero variance)');
+    ok(!defined $stats->fu_and_li_F_counts(2, 1, 3, 1),   'F n=2 undef');
+    ok(!defined $stats->tajima_D_counts(1, 3, 1),          'Tajima D n=1 undef');
+    ok(!defined $stats->tajima_D_counts(3, 3, 1.2),        'Tajima D n=3 undef (zero variance)');
+    ok(defined $stats->fu_and_li_D_star_counts(4, 3, 1),  'D* n=4 defined');
+    ok(defined $stats->fu_and_li_F_counts(4, 1, 3, 1),    'F n=4 defined');
 }

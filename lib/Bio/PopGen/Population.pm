@@ -400,7 +400,7 @@ sub get_marker_names {
 	$unique{$n}++;
     }
     my @nms = keys %unique;
-    if( $nms[0] =~ /^(Site|Codon)/ ) {
+    if( @nms && $nms[0] =~ /^(Site|Codon)/ ) {
 	# sort by site or codon number and do it in
 	# a schwartzian transformation baby!
 	@nms = map { $_->[1] }
